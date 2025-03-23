@@ -167,10 +167,7 @@ CREATE TABLE `players` (
 CREATE TABLE `player_achievements` (
   `achievement_id` int(11) NOT NULL,
   `session_id` int(11) NOT NULL,
-  `status` varchar(50) NOT NULL,
-  PRIMARY KEY (`achievement_id`, `session_id`),
-  FOREIGN KEY (`achievement_id`) REFERENCES `achievements` (`achievement_id`),
-  FOREIGN KEY (`session_id`) REFERENCES `game_sessions` (`session_id`)
+  `status` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
