@@ -5,7 +5,6 @@ require_once 'config.php';
 function getPlayers($playerId = null) {
     global $pdo;
     
-    // 添加调试信息
     if (!$pdo) {
         error_log("PDO connection is null in getPlayers()");
         return false;
@@ -176,10 +175,11 @@ function getTopPlayers($limit = 5, $criteria = 'total_gold_earned') {
                 FROM players p
                 JOIN player_statistics ps ON p.player_id = ps.player_id
                 ORDER BY ps.$criteria DESC
-                LIMIT ?";
+                LIMIT :limit";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$limit]);
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT); // 明确指定为整数类型
+        $stmt->execute();
         return $stmt->fetchAll();
     } catch (PDOException $e) {
         error_log("Error getting top players: " . $e->getMessage());

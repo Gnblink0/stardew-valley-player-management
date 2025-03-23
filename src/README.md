@@ -1,6 +1,25 @@
 This document provides the guide of how to use `src/functions.php` which are PHP functions available for accessing and manipulating player data in the Stardew Valley Game Analytics system.
 
 
+## Setup
+
+### Connection Check
+
+After finish the connection with web and database, go to http://localhost/stardew-valley-player-management/src/test_functions.php
+
+If you can see all test results, it means you can use these functions.
+
+
+###
+
+Make sure to include the function file in any script where these functions are used:
+
+```php
+require_once 'functions.php';    // Functions defined in this file
+
+```
+
+
 ## Player Functions
 
 

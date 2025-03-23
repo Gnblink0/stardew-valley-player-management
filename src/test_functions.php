@@ -83,6 +83,8 @@ printResult("getTotalAchievementsPerSession()", getTotalAchievementsPerSession()
 // Test getWeeklyPlaytimePerPlayer()
 printResult("getWeeklyPlaytimePerPlayer()", getWeeklyPlaytimePerPlayer());
 
+// Test getTopPlayers()
+printResult("getTopPlayers(3, 'total_gold_earned')", getTopPlayers(3, 'total_gold_earned')); 
 ?>
 </body>
 </html> 
