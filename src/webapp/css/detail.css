@@ -1,0 +1,309 @@
+:root {
+    --primary-color: #4e7c37;
+    --secondary-color: #936a39;
+    --accent-color: #f7cf7f;
+    --background-color: #f5f7ea;
+    --error-color: #d9534f;
+    --success-color: #5cb85c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.back-button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #7d5930;
+}
+
+.detail-title {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.detail-content {
+    padding: 30px;
+}
+
+.detail-image-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.detail-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid var(--accent-color);
+    background-color: #f0f0f0;
+    padding: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detail-image img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.detail-name {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Animal name can be edited */
+#animal-view .detail-name {
+    border: 1px dashed transparent;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+#animal-view .detail-name:hover, 
+#animal-view .detail-name:focus {
+    border-color: var(--accent-color);
+    background-color: #fcfcfc;
+    outline: none;
+}
+
+.detail-section {
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.detail-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* View switching */
+.detail-view {
+    display: none;
+}
+
+.detail-view.active {
+    display: block;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: bold;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.editable {
+    border: 1px dashed transparent;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.editable:hover, .editable:focus {
+    border-color: var(--accent-color);
+    background-color: #fcfcfc;
+    outline: none;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.primary-btn:hover {
+    background-color: #3e6029;
+}
+
+.secondary-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.secondary-btn:hover {
+    background-color: #7d5930;
+}
+
+/* Friendship hearts styling */
+.friendship-container {
+    margin-bottom: 20px;
+}
+
+.friendship-hearts-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.friendship-hearts {
+    display: flex;
+    gap: 5px;
+}
+
+.heart {
+    width: 25px;
+    height: 25px;
+    background-image: url('../images/heart.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.heart-empty {
+    opacity: 0.3;
+}
+
+.heart-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.heart-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.heart-btn:hover {
+    background-color: var(--accent-color);
+    color: #333;
+}
+
+/* Quantity controls */
+.quantity-control {
+    margin-bottom: 20px;
+}
+
+.quantity-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.quantity-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.quantity-btn:hover {
+    background-color: var(--accent-color);
+    color: #333;
+}
+
+.quantity-input {
+    width: 80px;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
