@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stardew Valley - Player Profile</title>
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="player-info">
+                <div class="player-avatar">
+                    <img id="player-avatar-img" src="" alt="Player Avatar">
+                </div>
+                <div class="player-details">
+                    <h1 id="player-name">Player Name</h1>
+                    <p id="farm-name">Farm Name</p>
+                </div>
+            </div>
+            <div class="buttons">
+                <button id="ranking-btn" class="btn">Ranking Details</button>
+                <button id="dashboard-btn" class="btn">Dashboard</button>                
+                <button id="logout-btn" class="btn">Logout</button>
+            </div>
+        </div>
+        
+        <div class="profile-content">
+            <!-- Player Statistics Section -->
+            <div class="profile-section">
+                <h2>Player Statistics</h2>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon gold-icon"></div>
+                        <div class="stat-info">
+                            <div class="stat-title">Total Gold Earned</div>
+                            <div class="stat-value" id="stat-gold">0g</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon days-icon"></div>
+                        <div class="stat-info">
+                            <div class="stat-title">Days Played</div>
+                            <div class="stat-value" id="stat-days">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon achievement-icon"></div>
+                        <div class="stat-info">
+                            <div class="stat-title">Average Achievements</div>
+                            <div class="stat-value" id="stat-achievements">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon session-icon"></div>
+                        <div class="stat-info">
+                            <div class="stat-title">Average Playtime</div>
+                            <div class="stat-value" id="stat-average-playtime">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Weekly Playtime Section -->
+            <div class="profile-section">
+                <h2>Weekly Playtime</h2>
+                <div class="weekly-playtime-container">
+                    <div class="weekly-filters">
+                        <select id="week-selector" class="select-filter">
+                        </select>
+                    </div>
+                    <div class="weekly-playtime-chart">
+                        <canvas id="weekly-playtime-chart"></canvas>
+                    </div>
+                    <div class="weekly-playtime-table-container">
+                        <table class="weekly-playtime-table">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Playtime (mins)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekly-playtime-data">
+                                <!-- Weekly playtime data will be added dynamically -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td id="weekly-total-playtime"><strong>0 mins</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          
+            <!-- Recent Game Sessions Section -->
+            <div class="profile-section">
+                <h2>Recent Game Sessions</h2>
+                    <!-- Add Game Session Form -->
+                    <div class="add-session-container">
+                        <h3>Add Game Session</h3>
+                        <label for="session-date">Date:</label>
+                        <input type="date" id="session-date" required>
+
+                        <label for="session-start-time">Start Time:</label>
+                        <input type="time" id="session-start-time" required>
+
+                        <label for="session-end-time">End Time:</label>
+                        <input type="time" id="session-end-time" required>
+
+                        <button id="add-session-btn" class="btn">Add Session</button>
+                    </div>
+                <div class="sessions-list" id="sessions-container">
+                    <!-- Session items will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Achievements Section -->
+            <div class="profile-section">
+                <h2>Achievements</h2>
+                <div class="achievement-header">
+                    <div class="achievement-progress">
+                        <div class="progress-label">Overall Progress:</div>
+                        <div class="overall-progress-container">
+                            <div class="overall-progress-bar" id="overall-achievement-progress"></div>
+                            <div class="progress-text" id="achievement-progress-text">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="achievements-grid" id="achievements-container">
+                    <!-- Achievement cards will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template for session item -->
+    <template id="session-item-template">
+        <div class="session-item" data-session-id="">
+            <div class="session-date"></div>
+            <div class="session-info">
+                <div class="session-duration">Duration: <span></span></div>
+                <div class="session-achievements">Achievements: <span></span></div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template for achievement card -->
+    <template id="achievement-card-template">
+        <div class="achievement-card" data-achievement-id="">
+            <div class="achievement-status"></div>
+            <div class="achievement-icon">
+                <img src="" alt="">
+            </div>
+            <div class="achievement-info">
+                <div class="achievement-name"></div>
+                <div class="achievement-goal"></div>
+                <div class="achievement-progress-container">
+                    <div class="achievement-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>
