@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Rankings</title>
+    <link rel="stylesheet" href="../css/ranking.css">
+</head>
+<body>
+    <div class="container">
+        <div class="ranking-container">
+            <div class="page-title">
+                <h1>Player Rankings</h1>
+                <p>See how you compare with other farmers!</p>
+            </div>
+            <div class="buttons">
+                <button id="profile-btn" class="btn">My Profile</button>
+                <button id="dashboard-btn" class="btn">Dashboard</button>
+                <button id="logout-btn" class="btn">Logout</button>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <h2>Total Playtime of All Players This Week</h2>
+            <p id="your-rank">Loading...</p>
+        </div>
+
+        <div class="ranking-section">
+            <h2>Achievements Unlocked by All Players This Week</h2>
+            <p id="your-rank">Loading...</p>
+        </div>
+
+        <div class="ranking-section">
+            <h2>Top 10 Players with Longest Playtime</h2>
+            <table id="playtime-rank">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Playtime (hours)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="ranking-section">
+            <h2>Top 10 Players with Most Achievements</h2>
+            <table id="achievement-rank">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player Name</th>
+                        <th>Achievements</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="ranking-section">
+            <h2>Your Ranking</h2>
+            <p id="your-rank">Loading...</p>
+        </div>
+    </div>
+
+    <script src="../js/ranking.js"></script>
+</body>
+</html>

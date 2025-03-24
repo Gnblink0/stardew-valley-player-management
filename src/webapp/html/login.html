@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stardew Valley - Player Management System</title>
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Stardew Valley</h1>
+            <p>Welcome to the Stardew Valley Player Management System! Here you can manage your farm character, view game data, and track your progress.</p>
+            <p>Create a new account or login to an existing one to begin your Stardew Valley farming journey!</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Player Management System</h2>
+                <div class="tabs">
+                    <div class="tab active" id="login-tab">Login</div>
+                    <div class="tab" id="register-tab">Register</div>
+                </div>
+            </div>
+            
+            <div class="login-form active" id="login-form">
+                <div class="form-group">
+                    <label for="login-id">Player ID</label>
+                    <input type="text" id="login-id" name="login-id" placeholder="Enter your player ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-name">Player Name</label>
+                    <input type="text" id="login-name" name="login-name" placeholder="Enter your player name">
+                </div>
+                
+                <button type="button" class="btn" id="login-btn" onclick="window.location.href='data.html'">Login</button>
+
+                
+                <div class="success-message" id="login-success-message">
+                    Login successful! Loading your farm data...
+                </div>
+                <div class="error-message" id="login-error-message"></div>
+            </div>
+            
+            <div class="register-form" id="register-form">
+                <div class="form-group">
+                    <label for="player-name">Player Name *</label>
+                    <input type="text" id="player-name" name="player-name" placeholder="Enter your player name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="farm-name">Farm Name *</label>
+                    <input type="text" id="farm-name" name="farm-name" placeholder="Enter your farm name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Avatar</label>
+                    <div class="avatar-selection">
+                        <div class="avatar-option selected" data-avatar="farmer1">
+                            <img src="images/farmer1.png" alt="Farmer 1">
+                        </div>
+                        <div class="avatar-option" data-avatar="farmer2">
+                            <img src="images/farmer2.png" alt="Farmer 2">
+                        </div>
+                        <div class="avatar-option" data-avatar="farmer3">
+                            <img src="images/farmer3.png" alt="Farmer 3">
+                        </div>
+                        <div class="avatar-option" data-avatar="farmer4">
+                            <img src="images/farmer4.png" alt="Farmer 4">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="init-gold">Initial Gold (Optional)</label>
+                    <input type="number" id="init-gold" name="init-gold" placeholder="Default is 0" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="init-days">Initial Game Days (Optional)</label>
+                    <input type="number" id="init-days" name="init-days" placeholder="Default is 0" min="0">
+                </div>
+                
+                <button type="button" class="btn" id="register-btn">Register</button>
+                
+                <div class="success-message" id="register-success-message">
+                    Registration successful! Your Player ID is: <span id="new-player-id"></span>
+                </div>
+                <div class="error-message" id="register-error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/login.js"></script>
+</body>
+</html>
