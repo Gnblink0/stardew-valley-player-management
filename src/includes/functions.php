@@ -390,7 +390,7 @@ function getPlayerPlaytimeStats() {
  * Get achievement statistics
  * @return array Achievement statistics including completion rate and top achievers
  */
-function getAchievementStats() {
+function getAchievementStats($playerId = null) {
     global $pdo;
     
     $stats = [
@@ -406,21 +406,8 @@ function getAchievementStats() {
         $stmt = $pdo->query("SELECT COUNT(*) as total FROM achievements");
         $stats['total_achievements'] = $stmt->fetch()['total'];
         
-        // Get completed achievements count
-        $stmt = $pdo->query("
-            SELECT COUNT(*) as completed 
-            FROM player_achievements 
-            WHERE status = 'Completed'
-        ");
-        $stats['total_completed'] = $stmt->fetch()['completed'];
-        
-        // Calculate completion rate
-        $stats['completion_rate'] = $stats['total_achievements'] > 0 
-            ? round(($stats['total_completed'] / $stats['total_achievements']) * 100) 
-            : 0;
-        
-        // Get recent achievements (修改这部分来获取正确的数据)
-        $stmt = $pdo->query("
+        // 构建基础查询
+        $recentAchievementsQuery = "
             SELECT 
                 a.name as achievement_name,
                 p.name as player_name,
@@ -431,10 +418,48 @@ function getAchievementStats() {
             JOIN game_sessions gs ON pa.session_id = gs.session_id
             JOIN players p ON gs.player_id = p.player_id
             WHERE pa.status = 'Completed'
-            ORDER BY gs.start_time DESC
-            LIMIT 5
-        ");
+        ";
+        
+        // 如果指定了玩家ID，添加玩家过滤条件
+        if ($playerId !== null) {
+            $recentAchievementsQuery .= " AND gs.player_id = :player_id";
+            
+            // 获取该玩家的已完成成就数量
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as completed 
+                FROM player_achievements pa
+                JOIN game_sessions gs ON pa.session_id = gs.session_id
+                WHERE pa.status = 'Completed' 
+                AND gs.player_id = :player_id
+            ");
+            $stmt->bindValue(':player_id', $playerId, PDO::PARAM_INT);
+            $stmt->execute();
+            $stats['total_completed'] = $stmt->fetch()['completed'];
+        } else {
+            // 获取所有玩家的已完成成就总数
+            $stmt = $pdo->query("
+                SELECT COUNT(*) as completed 
+                FROM player_achievements 
+                WHERE status = 'Completed'
+            ");
+            $stats['total_completed'] = $stmt->fetch()['completed'];
+        }
+        
+        // 添加排序和限制
+        $recentAchievementsQuery .= " ORDER BY gs.start_time DESC LIMIT 5";
+        
+        // 执行最近成就查询
+        $stmt = $pdo->prepare($recentAchievementsQuery);
+        if ($playerId !== null) {
+            $stmt->bindValue(':player_id', $playerId, PDO::PARAM_INT);
+        }
+        $stmt->execute();
         $stats['recent_achievements'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 计算完成率
+        $stats['completion_rate'] = $stats['total_achievements'] > 0 
+            ? round(($stats['total_completed'] / $stats['total_achievements']) * 100) 
+            : 0;
         
         return $stats;
     } catch (PDOException $e) {
