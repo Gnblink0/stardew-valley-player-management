@@ -311,7 +311,6 @@ function getPlayerCrops($playerId) {
         
         $crops = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 如果没有数据，返回空数组而不是 false
         return $crops;
     } catch (PDOException $e) {
         error_log("Error getting player crops: " . $e->getMessage());
@@ -319,18 +318,18 @@ function getPlayerCrops($playerId) {
     }
 }
 
-// 获取玩家动物数据
+// Get player animals data
 function getPlayerAnimals($playerId) {
     global $pdo;
     
     try {
-        $sql = "SELECT a.animal_id, a.name, at.name as type, 
+        $sql = "SELECT a.animal_id, a.name, at.type as type, 
                        CASE 
                            WHEN ba.animal_id IS NOT NULL THEN 'barn' 
                            WHEN ca.animal_id IS NOT NULL THEN 'coop' 
                            ELSE 'unknown' 
                        END as building,
-                       ap.produce_type as produce, a.image_url,
+                       ap.produce_type as produce,
                        pao.friendship_level, pao.owned as days_owned
                 FROM animals a
                 JOIN animal_types at ON a.type_id = at.type_id

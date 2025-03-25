@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // 从URL获取玩家ID
   const urlParams = new URLSearchParams(window.location.search);
   const playerId = urlParams.get("id");
 
@@ -10,27 +9,22 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // 使用玩家ID从服务器获取数据
   fetchPlayerData(playerId);
 });
 
-// 从服务器获取玩家数据
 function fetchPlayerData(playerId) {
   fetch(`/stardew-valley-player-management/src/api/player.php?id=${playerId}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("网络响应不正常");
-      };
+      }
       return response.json();
     })
     .then((data) => {
       if (data.status === "success") {
-        // 使用获取的数据更新页面
         updatePlayerInfo(data.data);
-        // 加载初始标签数据
         loadTabData("crops");
       } else {
-        // 显示错误信息
         document.body.innerHTML = `<div style="text-align: center; margin-top: 50px;"><h2>错误：${data.message}</h2></div>`;
       }
     })
@@ -41,7 +35,6 @@ function fetchPlayerData(playerId) {
     });
 }
 
-// 更新玩家信息
 function updatePlayerInfo(playerData) {
   document.getElementById("player-name").textContent = playerData.name;
   document.getElementById("farm-name").textContent =
@@ -113,7 +106,6 @@ inventoryButtons.forEach((button) => {
 
 // Function to load data based on the selected tab
 function loadTabData(tabName) {
-  // 根据标签名称加载相应的数据
   switch (tabName) {
     case "crops":
       loadCropsData();
@@ -127,12 +119,12 @@ function loadTabData(tabName) {
   }
 }
 
-// 加载作物数据
 function loadCropsData() {
   const playerId = new URLSearchParams(window.location.search).get("id");
 
-  // 从服务器获取作物数据
-  fetch(`/stardew-valley-player-management/src/api/crops.php?player_id=${playerId}`)
+  fetch(
+    `/stardew-valley-player-management/src/api/crops.php?player_id=${playerId}`
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("网络响应不正常");
@@ -155,27 +147,22 @@ function loadCropsData() {
     });
 }
 
-// 渲染作物数据
 function renderCrops(cropsData) {
   const container = document.getElementById("crops-container");
 
-  // 清除容器内容，但保留标题和过滤器
   const title = container.querySelector("h2");
   const filterSection = document.querySelector(".season-filter");
 
-  // 清空容器
   container.innerHTML = "";
 
-  // 如果有标题，添加回去
+  if (title) container.appendChild(title);
   if (title) container.appendChild(title);
 
-  // 创建作物容器
   const cropsGrid = document.createElement("div");
   cropsGrid.className = "crops-grid";
-  cropsGrid.id = "crops-grid"; // 添加ID以便于过滤
+  cropsGrid.id = "crops-grid";
   container.appendChild(cropsGrid);
 
-  // 添加作物卡片
   cropsData.forEach((crop) => {
     const cropCard = document.createElement("div");
     cropCard.className = "crop-card";
@@ -196,20 +183,16 @@ function renderCrops(cropsData) {
     cropsGrid.appendChild(cropCard);
   });
 
-  // 初始显示所有作物
   filterCropsBySeason("all");
 }
 
-// 按季节过滤作物
 function filterCropsBySeason(season) {
   const cropCards = document.querySelectorAll(".crop-card");
   let visibleCount = 0;
 
   cropCards.forEach((card) => {
-    // 将季节字符串拆分为数组
     const seasons = card.dataset.season.split(",");
 
-    // 检查是否为"all"或者包含所选季节
     if (season === "all" || seasons.includes(season)) {
       card.style.display = "";
       visibleCount++;
@@ -218,7 +201,6 @@ function filterCropsBySeason(season) {
     }
   });
 
-  // 处理空结果消息
   const cropsGrid = document.getElementById("crops-grid");
   const existingEmptyMessage = document.querySelector(".empty-season-message");
 
@@ -242,43 +224,31 @@ function filterCropsBySeason(season) {
 
 // Load animals data
 function loadAnimalsData() {
-  // Mock data for animals
-  const mockAnimalsData = [
-    {
-      animal_id: 1,
-      name: "Bessie",
-      type: "Cow",
-      produce: "Milk",
-      friendship: 8,
-      location: "barn",
-    },
-    {
-      animal_id: 2,
-      name: "Clucky",
-      type: "Chicken",
-      produce: "Egg",
-      friendship: 10,
-      location: "coop",
-    },
-    {
-      animal_id: 3,
-      name: "Woolly",
-      type: "Sheep",
-      produce: "Wool",
-      friendship: 6,
-      location: "barn",
-    },
-    {
-      animal_id: 4,
-      name: "Quackers",
-      type: "Duck",
-      produce: "Duck Egg",
-      friendship: 7,
-      location: "coop",
-    },
-  ];
+  const playerId = new URLSearchParams(window.location.search).get("id");
 
-  renderAnimals(mockAnimalsData);
+  fetch(
+    `/stardew-valley-player-management/src/api/animals.php?player_id=${playerId}`
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("网络响应不正常");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        renderAnimals(data.data);
+      } else {
+        document.getElementById(
+          "animals-container"
+        ).innerHTML = `<div class="error-message">Error: ${data.message}</div>`;
+      }
+    })
+    .catch((error) => {
+      console.error("获取动物数据时出错:", error);
+      document.getElementById("animals-container").innerHTML =
+        '<div class="error-message">Error: Unable to load animals data</div>';
+    });
 }
 
 // Render animals to the DOM
@@ -291,11 +261,22 @@ function renderAnimals(animalsData) {
   container.innerHTML = "";
 
   if (animalsData.length === 0) {
-    emptyMessage.style.display = "block";
+    // 再次获取元素，因为可能刚刚创建了它
+    const emptyMsg = document.getElementById("empty-animals");
+    if (emptyMsg) emptyMsg.style.display = "block";
     return;
   }
 
-  emptyMessage.style.display = "none";
+  // 确保 emptyMessage 存在再设置它的样式
+  if (emptyMessage) emptyMessage.style.display = "none";
+
+  // 检查模板是否存在
+  if (!template) {
+    console.error("Animal card template not found");
+    container.innerHTML =
+      '<div class="error-message">Error: Template not found</div>';
+    return;
+  }
 
   // Create and append animal cards
   animalsData.forEach((animal) => {
@@ -307,7 +288,7 @@ function renderAnimals(animalsData) {
       .setAttribute("data-animal-id", animal.animal_id);
     animalCard
       .querySelector(".animal-card")
-      .setAttribute("data-type", animal.location);
+      .setAttribute("data-type", animal.building || animal.location);
     animalCard.querySelector(".animal-name").textContent = animal.name;
     animalCard.querySelector(".animal-type").textContent = animal.type;
     animalCard.querySelector(
@@ -320,7 +301,7 @@ function renderAnimals(animalsData) {
       const heart = document.createElement("div");
       heart.className = "heart";
       // Fill hearts based on friendship level
-      if (i < animal.friendship) {
+      if (i < (animal.friendship_level || animal.friendship)) {
         heart.classList.add("filled");
       }
       heartsContainer.appendChild(heart);
@@ -346,8 +327,10 @@ function filterAnimalsByType(type) {
   const visibleAnimals = document.querySelectorAll(
     '.animal-card[style="display: block"]'
   );
-  document.getElementById("empty-animals").style.display =
-    visibleAnimals.length === 0 ? "block" : "none";
+  const emptyMessage = document.getElementById("empty-animals");
+  if (emptyMessage) {
+    emptyMessage.style.display = visibleAnimals.length === 0 ? "block" : "none";
+  }
 }
 
 // Load inventory data
