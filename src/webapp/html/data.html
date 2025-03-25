@@ -1,138 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stardew Valley - Homepage</title>
-    <link rel="stylesheet" href="../css/data.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/data.css" />
+  </head>
+  <body>
     <div class="dashboard-container">
-        <div class="dashboard-header">
-            <div class="player-info">
-                <div class="player-avatar">
-                    <img id="player-avatar-img" src="" alt="Player Avatar">
-                </div>
-                <div class="player-details">
-                    <h1 id="player-name">Player Name</h1>
-                    <p id="farm-name">Farm Name</p>
-                </div>
-            </div>
-            <div class="player-stats">
-                <div class="stat">
-                    <div class="stat-value" id="player-gold">0</div>
-                    <div class="stat-label">Gold</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="player-days">0</div>
-                    <div class="stat-label">Days</div>
-                </div>
-                <button id="logout-btn" class="btn">Logout</button>
-            </div>
+      <div class="dashboard-header">
+        <div class="player-info">
+          <div class="player-details">
+            <h1 id="player-name">Player Name</h1>
+            <p id="farm-name">Farm Name</p>
+          </div>
         </div>
-        
-        <div class="dashboard-content">
-            <div class="tabs">
-                <div class="tab active" data-tab="crops">Crops</div>
-                <div class="tab" data-tab="animals">Animals</div>
-                <div class="tab" data-tab="inventory">Inventory</div>
-            </div>
-            
-            <!-- Crops Tab -->
-            <div class="tab-content active" id="crops-tab">
-                <h2>Crops</h2>
-                <div class="season-filter">
-                    <span>Filter by Season:</span>
-                    <button class="season-btn active" data-season="all">All</button>
-                    <button class="season-btn" data-season="spring">Spring</button>
-                    <button class="season-btn" data-season="summer">Summer</button>
-                    <button class="season-btn" data-season="fall">Fall</button>
-                    <button class="season-btn" data-season="winter">Winter</button>
-                </div>
-                <div class="crops-grid" id="crops-container">
-                    <!-- Crop cards will be dynamically added here -->
-                </div>
-                <div class="empty-message" id="empty-crops">You don't have any crops yet.</div>
-            </div>
-            
-            <!-- Animals Tab -->
-            <div class="tab-content" id="animals-tab">
-                <h2>Animals</h2>
-                <div class="animal-filter">
-                    <span>Filter by Type:</span>
-                    <button class="animal-btn active" data-type="all">All</button>
-                    <button class="animal-btn" data-type="barn">Barn</button>
-                    <button class="animal-btn" data-type="coop">Coop</button>
-                </div>
-                <div class="animals-grid" id="animals-container">
-                    <!-- Animal cards will be dynamically added here -->
-                </div>
-                <div class="empty-message" id="empty-animals">You don't have any animals yet.</div>
-            </div>
-            
-            <!-- Inventory Tab -->
-            <div class="tab-content" id="inventory-tab">
-                <h2>Inventory</h2>
-                <div class="inventory-filter">
-                    <span>Filter by Type:</span>
-                    <button class="inventory-btn active" data-type="all">All</button>
-                    <button class="inventory-btn" data-type="tools">Tools</button>
-                    <button class="inventory-btn" data-type="seeds">Seeds</button>
-                    <button class="inventory-btn" data-type="vagetable">Vegetable</button>
-                    <button class="inventory-btn" data-type="fruit">Fruit</button>
-                    <button class="inventory-btn" data-type="animal-product">Animal Product</button>
-                </div>
-                <div class="inventory-grid" id="inventory-container">
-                    <!-- Item cards will be dynamically added here -->
-                </div>
-                <div class="empty-message" id="empty-inventory">Your inventory is empty.</div>
-            </div>
+        <div class="player-stats">
+          <div class="stat">
+            <div class="stat-value" id="player-gold">0</div>
+            <div class="stat-label">Gold</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="player-days">0</div>
+            <div class="stat-label">Days</div>
+          </div>
+          <button id="logout-btn" class="btn">Logout</button>
         </div>
+      </div>
+
+      <div class="dashboard-content">
+        <div class="tabs">
+          <div class="tab active" data-tab="crops">Crops</div>
+          <div class="tab" data-tab="animals">Animals</div>
+          <div class="tab" data-tab="inventory">Inventory</div>
+        </div>
+
+        <!-- Crops Tab -->
+        <div class="tab-content active" id="crops-tab">
+          <h2>Crops</h2>
+          <div class="season-filter">
+            <span>Filter by Season:</span>
+            <button class="season-btn active" data-season="all">All</button>
+            <button class="season-btn" data-season="spring">Spring</button>
+            <button class="season-btn" data-season="summer">Summer</button>
+            <button class="season-btn" data-season="fall">Fall</button>
+            <button class="season-btn" data-season="winter">Winter</button>
+          </div>
+          <div class="crops-grid" id="crops-container">
+            <!-- Crop cards will be dynamically added here -->
+          </div>
+        </div>
+
+        <!-- Animals Tab -->
+        <div class="tab-content" id="animals-tab">
+          <h2>Animals</h2>
+          <div class="animal-filter">
+            <span>Filter by Type:</span>
+            <button class="animal-btn active" data-type="all">All</button>
+            <button class="animal-btn" data-type="barn">Barn</button>
+            <button class="animal-btn" data-type="coop">Coop</button>
+          </div>
+          <div class="animals-grid">
+            <div id="animals-container">
+              <!-- Animal cards will be dynamically added here -->
+            </div>
+          </div>
+          <div id="empty-animals" style="display: none">
+            No animal items found.
+          </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div class="tab-content" id="inventory-tab">
+          <h2>Inventory</h2>
+          <div class="inventory-filter">
+            <span>Filter by Type:</span>
+            <button class="inventory-btn active" data-type="all">All</button>
+            <button class="inventory-btn" data-type="tools">Tools</button>
+            <button class="inventory-btn" data-type="seeds">Seeds</button>
+            <button class="inventory-btn" data-type="vagetable">
+              Vegetable
+            </button>
+            <button class="inventory-btn" data-type="fruit">Fruit</button>
+            <button class="inventory-btn" data-type="animal-product">
+              Animal Product
+            </button>
+          </div>
+          <div class="inventory-grid">
+            <div id="inventory-container">
+              <!-- Item cards will be dynamically added here -->
+            </div>
+            <div id="empty-inventory" style="display: none">
+              No inventory items found.
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Template for crop card -->
     <template id="crop-card-template">
-        <div class="crop-card" data-crop-id="">
-            <div class="crop-image">
-                <img src="" alt="">
-            </div>
-            <div class="crop-name"></div>
-            <div class="crop-season"></div>
-            <div class="crop-stats">
-                <div class="harvested">Harvested: <span></span></div>
-                <div class="sold">Sold: <span></span></div>
-            </div>
+      <div class="crop-card" data-crop-id="">
+        <div class="crop-name"></div>
+        <div class="crop-season"></div>
+        <div class="crop-stats">
+          <div class="harvested">Harvested: <span></span></div>
+          <div class="sold">Sold: <span></span></div>
         </div>
+      </div>
     </template>
 
     <!-- Template for animal card -->
     <template id="animal-card-template">
-        <div class="animal-card" data-animal-id="">
-            <div class="animal-image">
-                <img src="" alt="">
-            </div>
-            <div class="animal-name"></div>
-            <div class="animal-type"></div>
-            <div class="animal-produce"></div>
-            <div class="friendship-level">
-                <div class="friendship-hearts"></div>
-            </div>
+      <div class="animal-card" data-animal-id="">
+        <div class="animal-name"></div>
+        <div class="animal-type"></div>
+        <div class="animal-produce"></div>
+        <div class="friendship-level">
+          <div class="friendship-hearts"></div>
         </div>
+      </div>
     </template>
 
     <!-- Template for inventory item card -->
     <template id="item-card-template">
-        <div class="item-card" data-item-id="">
-            <div class="item-image">
-                <img src="" alt="">
-            </div>
-            <div class="item-name"></div>
-            <div class="item-type"></div>
-            <div class="item-quantity">Quantity: <span></span></div>
-            <div class="item-value">Value: <span></span>g</div>
+      <div class="item-card" data-item-id="">
+        <div class="item-name"></div>
+        <div class="item-type"></div>
+        <div class="item-stats">
+          <div class="item-quantity">Quantity: <span></span></div>
+          <div class="item-value">Value: <span>g</span></div>
         </div>
+      </div>
     </template>
 
     <script src="../js/data.js"></script>
-</body>
+  </body>
 </html>

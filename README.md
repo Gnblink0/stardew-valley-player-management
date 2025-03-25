@@ -59,9 +59,9 @@ In the `src` folder, create a file named `config.php` with the following code:
 <?php
 // Database configuration
 $host = 'localhost';
-$dbname = '';// Replace with your password if you set one in a previous class activity
+$dbname = 'stardew_valley';
 $username = 'root';
-$password = '3Dian1415926';
+$password = '';// Replace with your password if you set one in a previous class activity
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);

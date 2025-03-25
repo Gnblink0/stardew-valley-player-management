@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stardew Valley - Select Player</title>
+    <link rel="stylesheet" href="../css/login.css" />
+    <style>
+      .player-list {
+        margin-top: 20px;
+        position: relative;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      .player-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f5f7ea;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .player-item:hover {
+        background-color: #e0e5c1;
+      }
+      .player-info h3 {
+        margin: 0;
+        color: #4e7c37;
+      }
+      .player-info p {
+        margin: 5px 0 0;
+        color: #666;
+      }
+      .loading {
+        margin-bottom: 10px;
+      }
+      /* 修改侧边栏样式，增加宽度和滚动功能 */
+      .sidebar {
+        width: 300px;
+        background-color: #4e7c37;
+        color: white;
+        padding: 30px;
+        border-radius: 10px 0 0 10px;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .sidebar h1 {
+        color: #f7cf7f;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .sidebar p {
+        margin-bottom: 15px;
+        line-height: 1.5;
+      }
+
+      /* 修改排名区域样式，适应侧边栏 */
+      .top-players-section {
+        margin-top: 30px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        padding: 15px;
+      }
+
+      .top-players-section h3 {
+        margin-top: 0;
+        color: #f7cf7f;
+        margin-bottom: 15px;
+        font-size: 18px;
+      }
+
+      .ranking-tabs {
+        display: flex;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .ranking-tab {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+        font-size: 12px;
+        transition: background-color 0.3s;
+      }
+
+      .ranking-tab.active {
+        background-color: #f7cf7f;
+        color: #4e7c37;
+      }
+
+      .top-players-list {
+        margin-top: 10px;
+      }
+
+      .rank-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .rank-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .rank-position {
+        font-weight: bold;
+        font-size: 16px;
+        color: #f7cf7f;
+        width: 25px;
+      }
+
+      .rank-info {
+        flex-grow: 1;
+      }
+
+      .rank-info h4 {
+        margin: 0;
+        color: white;
+        font-size: 14px;
+      }
+
+      .rank-info p {
+        margin: 2px 0 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+      }
+
+      .rank-score {
+        font-weight: bold;
+        color: #f7cf7f;
+        font-size: 14px;
+      }
+
+      .loading {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar">
+        <h1>Stardew Valley</h1>
+        <p>Welcome to the Stardew Valley Player Management System!</p>
+        <p>Select a player to view their farm data.</p>
+
+        <!-- 添加排名区域到侧边栏 -->
+        <div class="top-players-section">
+          <h3>Top 5 Players</h3>
+          <div class="ranking-tabs">
+            <button
+              class="ranking-tab active"
+              data-criteria="total_gold_earned"
+            >
+              By Gold
+            </button>
+            <button class="ranking-tab" data-criteria="in_game_days">
+              By Days
+            </button>
+          </div>
+          <div id="top-players-list" class="top-players-list">
+            <div class="loading">Loading top players...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Select Player</h2>
+        </div>
+
+        <div class="player-list" id="player-list">
+          <!-- 玩家列表将通过JavaScript动态添加 -->
+          <div class="loading">Loading players...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 从服务器获取所有玩家
+        fetch("../../api/players.php")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              renderPlayerList(data.data);
+            } else {
+              document.getElementById(
+                "player-list"
+              ).innerHTML = `<p>Error: ${data.message}</p>`;
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching players:", error);
+            document.getElementById("player-list").innerHTML =
+              "<p>Error connecting to server. Please try again later.</p>";
+          });
+
+        // 获取并显示排名数据（默认按金币排名）
+        fetchTopPlayers("total_gold_earned");
+
+        // 为排名标签添加点击事件
+        const rankingTabs = document.querySelectorAll(".ranking-tab");
+        rankingTabs.forEach((tab) => {
+          tab.addEventListener("click", function () {
+            // 移除所有标签的active类
+            rankingTabs.forEach((t) => t.classList.remove("active"));
+            // 为当前点击的标签添加active类
+            this.classList.add("active");
+            // 获取排名标准
+            const criteria = this.getAttribute("data-criteria");
+            // 获取并显示排名数据
+            fetchTopPlayers(criteria);
+          });
+        });
+      });
+
+      // 获取排名数据
+      function fetchTopPlayers(criteria) {
+        const topPlayersList = document.getElementById("top-players-list");
+        topPlayersList.innerHTML =
+          '<div class="loading">Loading top players...</div>';
+
+        fetch(`../../api/top_players.php?limit=5&criteria=${criteria}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              renderTopPlayers(data.data, criteria);
+            } else {
+              topPlayersList.innerHTML = `<p>Error: ${data.message}</p>`;
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching top players:", error);
+            topPlayersList.innerHTML =
+              "<p>Error loading top players. Please try again later.</p>";
+          });
+      }
+
+      // 渲染排名数据
+      function renderTopPlayers(players, criteria) {
+        const topPlayersList = document.getElementById("top-players-list");
+        topPlayersList.innerHTML = "";
+
+        if (!players || players.length === 0) {
+          topPlayersList.innerHTML = "<p>No players found.</p>";
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        players.forEach((player, index) => {
+          const rankItem = document.createElement("div");
+          rankItem.className = "rank-item";
+          rankItem.setAttribute("data-player-id", player.player_id);
+
+          // 根据排名标准显示不同的分数标签
+          const scoreLabel = criteria === "total_gold_earned" ? "Gold" : "Days";
+          const scoreValue =
+            criteria === "total_gold_earned"
+              ? formatNumber(player.score) + "g"
+              : player.score;
+
+          rankItem.innerHTML = `
+            <div class="rank-position">#${index + 1}</div>
+            <div class="rank-info">
+              <h4>${player.name}</h4>
+              <p>${player.farm_name || "Farm"}</p>
+            </div>
+            <div class="rank-score">${scoreValue}</div>
+          `;
+
+          // 添加点击事件，点击排名项也可以进入玩家资料页面
+          rankItem.addEventListener("click", function () {
+            window.location.href = `profile.html?id=${player.player_id}`;
+          });
+
+          fragment.appendChild(rankItem);
+        });
+
+        topPlayersList.appendChild(fragment);
+      }
+
+      // 格式化数字（添加千位分隔符）
+      function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      // 原有的renderPlayerList函数保持不变
+      function renderPlayerList(players) {
+        const playerList = document.getElementById("player-list");
+        playerList.innerHTML = "";
+
+        if (!players || players.length === 0) {
+          playerList.innerHTML = "<p>No players found.</p>";
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        players.forEach((player) => {
+          const playerItem = document.createElement("div");
+          playerItem.className = "player-item";
+          playerItem.setAttribute("data-player-id", player.player_id);
+
+          playerItem.innerHTML = `
+                    <div class="player-info">
+                        <h3>${player.name}</h3>
+                        <p>${player.farm_name || "Farm"}</p>
+                    </div>
+                `;
+
+          playerItem.addEventListener("click", function () {
+            window.location.href = `profile.html?id=${player.player_id}`;
+          });
+
+          fragment.appendChild(playerItem);
+        });
+
+        playerList.appendChild(fragment);
+      }
+    </script>
+  </body>
+</html>
