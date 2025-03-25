@@ -295,7 +295,6 @@ function getPlayerStatistics($playerId) {
     }
 }
 
-// 获取玩家作物数据
 function getPlayerCrops($playerId) {
     global $pdo;
     
@@ -348,7 +347,6 @@ function getPlayerAnimals($playerId) {
     }
 }
 
-// 获取玩家库存数据
 function getPlayerInventory($playerId) {
     global $pdo;
     

@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // For demo purposes, return mock data
 // In a real application, this would fetch data from a server
 function fetchPlayerData() {
+
   const urlParams = new URLSearchParams(window.location.search);
   const playerId = urlParams.get("id");
 
