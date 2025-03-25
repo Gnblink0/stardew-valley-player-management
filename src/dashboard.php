@@ -12,6 +12,78 @@ $mostValuableItems = getMostValuableItems(5);
 
 <?php include 'components/header.php'; ?>
 
+<!-- 添加排名区域的 CSS 样式 -->
+<style>
+    .top-players-list {
+        margin-top: 10px;
+    }
+    
+    .rank-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+    }
+    
+    .rank-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .rank-item:last-child {
+        border-bottom: none;
+    }
+    
+    .rank-position {
+        font-weight: bold;
+        font-size: 18px;
+        color: #6c757d;
+        width: 40px;
+        text-align: center;
+    }
+    
+    .rank-position.top-1 {
+        color: #ffc107; /* Gold */
+    }
+    
+    .rank-position.top-2 {
+        color: #adb5bd; /* Silver */
+    }
+    
+    .rank-position.top-3 {
+        color: #cd7f32; /* Bronze */
+    }
+    
+    .rank-info {
+        flex-grow: 1;
+        padding: 0 15px;
+    }
+    
+    .rank-info h4 {
+        margin: 0;
+        color: #212529;
+        font-size: 16px;
+    }
+    
+    .rank-info p {
+        margin: 2px 0 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .rank-score {
+        font-weight: bold;
+        color: #28a745;
+        font-size: 16px;
+        text-align: right;
+        min-width: 100px;
+    }
+    
+    .rank-actions {
+        margin-left: 15px;
+    }
+</style>
+
 <div class="row">
     <!-- Sidebar -->
     <?php include 'components/sidebar.php'; ?>
@@ -149,14 +221,25 @@ $mostValuableItems = getMostValuableItems(5);
             </div>
             
             <div class="row">
-                <!-- Top Players Chart -->
-                <div class="col-md-6 mb-4">
+                <!-- Top Players Ranking -->
+                <div class="col-md-12 mb-4">
                     <div class="card">
-                        <div class="card-header">
-                            <h5>Top Players by Gold</h5>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Top Players Ranking</h5>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active" data-criteria="total_gold_earned">By Gold</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-criteria="in_game_days">By Days Played</button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <canvas id="topPlayersChart" width="100%" height="300"></canvas>
+                            <div class="top-players-list" id="top-players-list">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading top players...</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -983,3 +1066,103 @@ $mostValuableItems = getMostValuableItems(5);
 </div>
 
 <?php include 'components/footer.php'; ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取并显示排名数据（默认按金币排名）
+        fetchTopPlayers('total_gold_earned');
+        
+        // 为排名标签添加点击事件
+        const rankingButtons = document.querySelectorAll('.card-header .btn-group button');
+        rankingButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // 移除所有按钮的 active 类
+                rankingButtons.forEach(btn => btn.classList.remove('active'));
+                // 为当前点击的按钮添加 active 类
+                this.classList.add('active');
+                // 获取排名标准
+                const criteria = this.getAttribute('data-criteria');
+                // 获取并显示排名数据
+                fetchTopPlayers(criteria);
+            });
+        });
+    });
+    
+    // 获取排名数据
+    function fetchTopPlayers(criteria) {
+        const topPlayersList = document.getElementById('top-players-list');
+        topPlayersList.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading top players...</p>
+            </div>
+        `;
+        
+        fetch(`api/top_players.php?limit=5&criteria=${criteria}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    renderTopPlayers(data.data, criteria);
+                } else {
+                    topPlayersList.innerHTML = `<p class="text-danger">Error: ${data.message}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching top players:', error);
+                topPlayersList.innerHTML = '<p class="text-danger">Error loading top players. Please try again later.</p>';
+            });
+    }
+    
+    // 渲染排名数据
+    function renderTopPlayers(players, criteria) {
+        const topPlayersList = document.getElementById('top-players-list');
+        topPlayersList.innerHTML = '';
+        
+        if (!players || players.length === 0) {
+            topPlayersList.innerHTML = '<p class="text-center">No players found.</p>';
+            return;
+        }
+        
+        const fragment = document.createDocumentFragment();
+        
+        players.forEach((player, index) => {
+            const rankItem = document.createElement('div');
+            rankItem.className = 'rank-item';
+            rankItem.setAttribute('data-player-id', player.player_id);
+            
+            // 根据排名标准显示不同的分数标签
+            const scoreLabel = criteria === 'total_gold_earned' ? 'Gold' : 'Days';
+            const scoreValue = criteria === 'total_gold_earned' 
+                ? formatGold(player.score) 
+                : player.score;
+            
+            // 为前三名添加特殊样式
+            const positionClass = index < 3 ? ` top-${index + 1}` : '';
+            
+            rankItem.innerHTML = `
+                <div class="rank-position${positionClass}">#${index + 1}</div>
+                <div class="rank-info">
+                    <h4>${player.name}</h4>
+                    <p>${player.farm_name || 'Farm'}</p>
+                </div>
+                <div class="rank-score">${scoreValue}</div>
+                <div class="rank-actions">
+                    <a href="players.php?id=${player.player_id}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </div>
+            `;
+            
+            fragment.appendChild(rankItem);
+        });
+        
+        topPlayersList.appendChild(fragment);
+    }
+    
+    // 格式化金币数字（添加千位分隔符和 g 后缀）
+    function formatGold(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'g';
+    }
+</script>
