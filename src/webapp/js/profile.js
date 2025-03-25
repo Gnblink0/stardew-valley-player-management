@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // For demo purposes, return mock data
 // In a real application, this would fetch data from a server
 function fetchPlayerData() {
-
   const urlParams = new URLSearchParams(window.location.search);
   const playerId = urlParams.get("id");
 
@@ -75,20 +74,20 @@ function fetchPlayerData() {
 function populatePlayerInfo(playerData) {
   const playerNameEl = document.getElementById("player-name");
   const farmNameEl = document.getElementById("farm-name");
-  const avatarEl = document.getElementById("player-avatar-img");
 
   if (playerNameEl) playerNameEl.textContent = playerData.name;
   if (farmNameEl)
     farmNameEl.textContent = playerData.farm_name || "Unknown Farm";
-  if (avatarEl) avatarEl.src = playerData.avatarUrl;
 }
 
 function populatePlayerStats(playerData) {
+  // 获取统计数据元素
   const goldElement = document.getElementById("stat-gold");
   const daysElement = document.getElementById("stat-days");
   const achievementsElement = document.getElementById("stat-achievements");
   const playtimeElement = document.getElementById("stat-average-playtime");
 
+  // 安全地设置文本内容，确保元素存在
   if (goldElement) {
     goldElement.textContent =
       formatNumber(playerData.total_gold_earned || 0) + "g";
@@ -98,12 +97,43 @@ function populatePlayerStats(playerData) {
     daysElement.textContent = playerData.in_game_days || 0;
   }
 
+  // 处理成就数据 - 检查所有可能的字段名
   if (achievementsElement) {
-    achievementsElement.textContent = playerData.achievements_completed || 0;
+    // 打印整个 playerData 对象，查看所有可用字段
+    console.log("Complete player data:", playerData);
+
+    // 尝试从不同可能的字段名获取成就数据
+    let achievements = 0;
+
+    if (playerData.achievements_completed !== undefined) {
+      achievements = playerData.achievements_completed;
+    } else if (playerData.achievements_count !== undefined) {
+      achievements = playerData.achievements_count;
+    } else if (playerData.completed_achievements !== undefined) {
+      achievements = playerData.completed_achievements;
+    } else if (playerData.achievements !== undefined) {
+      // 如果 achievements 是一个数组，计算其长度
+      if (Array.isArray(playerData.achievements)) {
+        achievements = playerData.achievements.length;
+      } else {
+        achievements = playerData.achievements;
+      }
+    }
+
+    achievementsElement.textContent = achievements;
+    console.log("Setting achievements to:", achievements);
   }
 
+  // 处理平均游戏时间数据
   if (playtimeElement) {
-    playtimeElement.textContent = (playerData.average_playtime || 0) + " mins";
+    // 尝试从不同可能的字段名获取平均游戏时间数据
+    const playtime =
+      playerData.average_playtime ||
+      playerData.avg_playtime ||
+      playerData.playtime_average ||
+      0;
+
+    playtimeElement.textContent = playtime + " mins";
   }
 }
 
@@ -296,14 +326,6 @@ function populateAchievements(achievements) {
     card.querySelector(".achievement-name").textContent = achievement.name;
     card.querySelector(".achievement-goal").textContent =
       achievement.description;
-
-    // Update image paths to use relative paths and handle potential missing images
-    const imgElement = card.querySelector(".achievement-icon img");
-    imgElement.src = achievement.iconUrl;
-    imgElement.alt = achievement.name;
-    imgElement.onerror = function () {
-      this.src = "./assets/images/default_achievement.png";
-    };
 
     // Set status indicator
     const statusElement = card.querySelector(".achievement-status");
