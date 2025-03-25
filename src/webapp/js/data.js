@@ -16,7 +16,7 @@ function fetchPlayerData(playerId) {
   fetch(`/stardew-valley-player-management/src/api/player.php?id=${playerId}`)
     .then((response) => {
       if (!response.ok) {
-        throw new Error("网络响应不正常");
+        throw new Error("Network response not ok");
       }
       return response.json();
     })
@@ -29,7 +29,7 @@ function fetchPlayerData(playerId) {
       }
     })
     .catch((error) => {
-      console.error("获取玩家数据时出错:", error);
+      console.error("Error fetching player data:", error);
       document.body.innerHTML =
         '<div style="text-align: center; margin-top: 50px;"><h2>错误：无法连接到服务器</h2><p>请稍后再试</p></div>';
     });
@@ -127,7 +127,7 @@ function loadCropsData() {
   )
     .then((response) => {
       if (!response.ok) {
-        throw new Error("网络响应不正常");
+        throw new Error("Network response not ok");
       }
       return response.json();
     })
@@ -141,7 +141,7 @@ function loadCropsData() {
       }
     })
     .catch((error) => {
-      console.error("获取作物数据时出错:", error);
+      console.error("Error fetching crops data:", error);
       document.getElementById("crops-container").innerHTML =
         '<div class="error-message">Error: Unable to load crops data</div>';
     });
@@ -231,7 +231,7 @@ function loadAnimalsData() {
   )
     .then((response) => {
       if (!response.ok) {
-        throw new Error("网络响应不正常");
+        throw new Error("Network response not ok");
       }
       return response.json();
     })
@@ -245,7 +245,7 @@ function loadAnimalsData() {
       }
     })
     .catch((error) => {
-      console.error("获取动物数据时出错:", error);
+      console.error("Error fetching animals data:", error);
       document.getElementById("animals-container").innerHTML =
         '<div class="error-message">Error: Unable to load animals data</div>';
     });
@@ -254,132 +254,110 @@ function loadAnimalsData() {
 // Render animals to the DOM
 function renderAnimals(animalsData) {
   const container = document.getElementById("animals-container");
-  const emptyMessage = document.getElementById("empty-animals");
-  const template = document.getElementById("animal-card-template");
 
-  // Clear container
   container.innerHTML = "";
 
-  if (animalsData.length === 0) {
-    // 再次获取元素，因为可能刚刚创建了它
-    const emptyMsg = document.getElementById("empty-animals");
-    if (emptyMsg) emptyMsg.style.display = "block";
+  if (!animalsData || animalsData.length === 0) {
+    container.innerHTML = '<div class="empty-message">No animals found.</div>';
     return;
   }
 
-  // 确保 emptyMessage 存在再设置它的样式
-  if (emptyMessage) emptyMessage.style.display = "none";
+  const animalsGrid = document.createElement("div");
+  animalsGrid.className = "animals-grid";
+  animalsGrid.id = "animals-grid";
+  container.appendChild(animalsGrid);
 
-  // 检查模板是否存在
-  if (!template) {
-    console.error("Animal card template not found");
-    container.innerHTML =
-      '<div class="error-message">Error: Template not found</div>';
-    return;
-  }
-
-  // Create and append animal cards
   animalsData.forEach((animal) => {
-    const animalCard = template.content.cloneNode(true);
+    const animalCard = document.createElement("div");
+    animalCard.className = "animal-card";
+    animalCard.dataset.animalId = animal.animal_id;
+    animalCard.dataset.type = animal.building;
 
-    // Set data and content
-    animalCard
-      .querySelector(".animal-card")
-      .setAttribute("data-animal-id", animal.animal_id);
-    animalCard
-      .querySelector(".animal-card")
-      .setAttribute("data-type", animal.building || animal.location);
-    animalCard.querySelector(".animal-name").textContent = animal.name;
-    animalCard.querySelector(".animal-type").textContent = animal.type;
-    animalCard.querySelector(
-      ".animal-produce"
-    ).textContent = `Produces: ${animal.produce}`;
+    animalCard.innerHTML = `
+      <div class="animal-name">${animal.name}</div>
+      <div class="animal-type">${capitalizeFirstLetter(animal.type)}</div>
+      <div class="animal-produce">${
+        animal.produce
+          ? `Produces: ${capitalizeFirstLetter(animal.produce)}`
+          : "No produce"
+      }</div>
+      <div class="friendship-hearts"></div>
+    `;
 
-    // Create friendship hearts
     const heartsContainer = animalCard.querySelector(".friendship-hearts");
-    for (let i = 0; i < 10; i++) {
+    const friendshipLevel = parseInt(animal.friendship_level) || 0;
+    const maxHearts = 5;
+
+    for (let i = 0; i < maxHearts; i++) {
       const heart = document.createElement("div");
-      heart.className = "heart";
-      // Fill hearts based on friendship level
-      if (i < (animal.friendship_level || animal.friendship)) {
-        heart.classList.add("filled");
-      }
+      heart.className = i < friendshipLevel ? "heart filled" : "heart";
       heartsContainer.appendChild(heart);
     }
 
-    container.appendChild(animalCard);
+    animalsGrid.appendChild(animalCard);
   });
 }
 
 // Filter animals by type
 function filterAnimalsByType(type) {
   const animalCards = document.querySelectorAll(".animal-card");
+  let visibleCount = 0;
 
   animalCards.forEach((card) => {
     if (type === "all" || card.getAttribute("data-type") === type) {
-      card.style.display = "block";
+      card.style.display = "";
+      visibleCount++;
     } else {
       card.style.display = "none";
     }
   });
 
-  // Show empty message if no animals are visible
-  const visibleAnimals = document.querySelectorAll(
-    '.animal-card[style="display: block"]'
-  );
-  const emptyMessage = document.getElementById("empty-animals");
-  if (emptyMessage) {
-    emptyMessage.style.display = visibleAnimals.length === 0 ? "block" : "none";
+  // 显示空消息（如果没有可见的动物）
+  const emptyMessage =
+    document.querySelector(".empty-message") || document.createElement("div");
+  if (visibleCount === 0) {
+    if (!document.querySelector(".empty-message")) {
+      emptyMessage.className = "empty-message";
+      emptyMessage.textContent = `No ${
+        type !== "all" ? type : ""
+      } animals available.`;
+      const animalsGrid = document.getElementById("animals-grid");
+      if (animalsGrid) {
+        animalsGrid.appendChild(emptyMessage);
+      }
+    }
+  } else if (document.querySelector(".empty-message")) {
+    document.querySelector(".empty-message").remove();
   }
 }
 
 // Load inventory data
 function loadInventoryData() {
-  // Mock data for inventory
-  const mockInventoryData = [
-    {
-      item_id: 1,
-      name: "Watering Can",
-      type: "tools",
-      quantity: 1,
-      value: 100,
-      image: "watering_can.png",
-    },
-    {
-      item_id: 2,
-      name: "Parsnip Seeds",
-      type: "seeds",
-      quantity: 15,
-      value: 20,
-      image: "parsnip_seeds.png",
-    },
-    {
-      item_id: 3,
-      name: "Potato",
-      type: "produce",
-      quantity: 8,
-      value: 80,
-      image: "potato.png",
-    },
-    {
-      item_id: 4,
-      name: "Ancient Seed",
-      type: "seeds",
-      quantity: 1,
-      value: 500,
-      image: "ancient_seed.png",
-    },
-    {
-      item_id: 5,
-      name: "Dinosaur Egg",
-      type: "artifacts",
-      quantity: 1,
-      value: 350,
-      image: "dinosaur_egg.png",
-    },
-  ];
+  const playerId = new URLSearchParams(window.location.search).get("id");
 
-  renderInventory(mockInventoryData);
+  fetch(
+    `/stardew-valley-player-management/src/api/inventory.php?player_id=${playerId}`
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.status === "success") {
+        renderInventory(data.data);
+      } else {
+        document.getElementById(
+          "inventory-container"
+        ).innerHTML = `<div class="error-message">Error: ${data.message}</div>`;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching inventory data:", error);
+      document.getElementById("inventory-container").innerHTML =
+        '<div class="error-message">Error: Unable to load inventory data</div>';
+    });
 }
 
 // Render inventory to the DOM
@@ -421,45 +399,23 @@ function renderInventory(inventoryData) {
 // Filter inventory by type
 function filterInventoryByType(type) {
   const itemCards = document.querySelectorAll(".item-card");
+  let visibleCount = 0;
 
   itemCards.forEach((card) => {
     if (type === "all" || card.getAttribute("data-type") === type) {
       card.style.display = "block";
+      visibleCount++;
     } else {
       card.style.display = "none";
     }
   });
 
-  // Show empty message if no items are visible
-  const visibleItems = document.querySelectorAll(
-    '.item-card[style="display: block"]'
-  );
+  // 使用计数器而不是DOM查询来确定是否有可见元素
   document.getElementById("empty-inventory").style.display =
-    visibleItems.length === 0 ? "block" : "none";
+    visibleCount === 0 ? "block" : "none";
 }
 
 // Helper function to capitalize first letter
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
-// 移除页面上可能存在的重复过滤器
-document.addEventListener("DOMContentLoaded", function () {
-  // 检查是否有多个过滤器容器
-  const filterContainers = document.querySelectorAll(".filter-container");
-  if (filterContainers.length > 1) {
-    // 保留第一个，删除其余的
-    for (let i = 1; i < filterContainers.length; i++) {
-      filterContainers[i].remove();
-    }
-  }
-
-  // 检查是否有多个季节过滤器组
-  const seasonFilters = document.querySelectorAll(".season-filters");
-  if (seasonFilters.length > 1) {
-    // 保留第一个，删除其余的
-    for (let i = 1; i < seasonFilters.length; i++) {
-      seasonFilters[i].remove();
-    }
-  }
-});

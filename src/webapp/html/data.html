@@ -60,8 +60,13 @@
             <button class="animal-btn" data-type="barn">Barn</button>
             <button class="animal-btn" data-type="coop">Coop</button>
           </div>
-          <div class="animals-grid" id="animals-container">
-            <!-- Animal cards will be dynamically added here -->
+          <div class="animals-grid">
+            <div id="animals-container">
+              <!-- Animal cards will be dynamically added here -->
+            </div>
+          </div>
+          <div id="empty-animals" style="display: none">
+            No animal items found.
           </div>
         </div>
 
@@ -81,8 +86,13 @@
               Animal Product
             </button>
           </div>
-          <div class="inventory-grid" id="inventory-container">
-            <!-- Item cards will be dynamically added here -->
+          <div class="inventory-grid">
+            <div id="inventory-container">
+              <!-- Item cards will be dynamically added here -->
+            </div>
+            <div id="empty-inventory" style="display: none">
+              No inventory items found.
+            </div>
           </div>
         </div>
       </div>
@@ -117,8 +127,10 @@
       <div class="item-card" data-item-id="">
         <div class="item-name"></div>
         <div class="item-type"></div>
-        <div class="item-quantity">Quantity: <span></span></div>
-        <div class="item-value">Value: <span></span>g</div>
+        <div class="item-stats">
+          <div class="item-quantity">Quantity: <span></span></div>
+          <div class="item-value">Value: <span>g</span></div>
+        </div>
       </div>
     </template>
 

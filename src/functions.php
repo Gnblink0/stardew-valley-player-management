@@ -353,7 +353,7 @@ function getPlayerInventory($playerId) {
     global $pdo;
     
     try {
-        $sql = "SELECT i.item_id, i.name, i.type, i.value, i.image_url,
+        $sql = "SELECT i.item_id, i.name, i.type, i.value,
                        inv.quantity
                 FROM items i
                 JOIN inventory inv ON i.item_id = inv.item_id
