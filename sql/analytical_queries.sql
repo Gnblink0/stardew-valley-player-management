@@ -90,3 +90,83 @@ SELECT 'player_crops_harvested', COUNT(*) FROM player_crops_harvested UNION
 SELECT 'player_statistics', COUNT(*) FROM player_statistics UNION
 SELECT 'players', COUNT(*) FROM players
 ORDER BY table_name;
+
+-- 11. Seasonal Crop Performance Analysis
+-- Calculate total harvested and sold crops per season
+SELECT 
+    c.season, 
+    c.name AS crop_name, 
+    SUM(pch.harvested) AS total_harvested, 
+    SUM(pch.sold) AS total_sold,
+    AVG(pch.sold / pch.harvested * 100) AS avg_sell_percentage
+FROM crops c
+JOIN player_crops_harvested pch ON c.crop_id = pch.crop_id
+GROUP BY c.season, c.name
+ORDER BY total_harvested DESC;
+
+-- 12. Player Engagement and Achievement Progression
+-- Analyze the relationship between playtime and achievement completion
+SELECT 
+    p.name AS player_name, 
+    ps.in_game_days,
+    SUM(TIMESTAMPDIFF(MINUTE, gs.start_time, gs.end_time)) AS total_playtime_minutes,
+    COUNT(DISTINCT pa.achievement_id) AS completed_achievements,
+    ROUND(COUNT(DISTINCT pa.achievement_id) / (SELECT COUNT(*) FROM achievements) * 100, 2) AS achievement_completion_percentage
+FROM players p
+JOIN game_sessions gs ON p.player_id = gs.player_id
+JOIN player_statistics ps ON p.player_id = ps.player_id
+LEFT JOIN player_achievements pa ON gs.session_id = pa.session_id AND pa.status = 'Completed'
+GROUP BY p.player_id
+ORDER BY completed_achievements DESC;
+
+-- 13. Animal Friendship and Produce Efficiency
+-- Analyze the relationship between animal friendship levels and produce quantity
+SELECT 
+    p.name AS player_name, 
+    at.type AS animal_type, 
+    a.name AS animal_name,
+    pao.friendship_level,
+    ap.produce_type,
+    COUNT(DISTINCT inv.item_id) AS unique_produce_items,
+    SUM(inv.quantity) AS total_produce_quantity
+FROM players p
+JOIN player_animals_owned pao ON p.player_id = pao.player_id
+JOIN animals a ON pao.animal_id = a.animal_id
+JOIN animal_types at ON a.type_id = at.type_id
+LEFT JOIN animal_produce ap ON at.type_id = ap.type_id
+LEFT JOIN inventory inv ON p.player_id = inv.player_id
+JOIN items i ON inv.item_id = i.item_id AND i.name = ap.produce_type
+WHERE pao.owned = 1
+GROUP BY p.name, at.type, a.name, pao.friendship_level
+ORDER BY pao.friendship_level DESC
+LIMIT 20;
+
+-- 14. Inventory Value Distribution
+-- Analyze the distribution of item values in players' inventories
+SELECT 
+    i.type AS item_type,
+    COUNT(DISTINCT inv.item_id) AS unique_item_count,
+    ROUND(AVG(i.value), 2) AS average_item_value,
+    ROUND(MIN(i.value), 2) AS min_item_value,
+    ROUND(MAX(i.value), 2) AS max_item_value,
+    ROUND(SUM(i.value * inv.quantity), 2) AS total_inventory_value
+FROM inventory inv
+JOIN items i ON inv.item_id = i.item_id
+GROUP BY i.type
+ORDER BY total_inventory_value DESC;
+
+-- 15. Session Length and Player Performance Correlation
+-- Investigate how session length relates to in-game achievements and gold earning
+SELECT 
+    p.name AS player_name,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, gs.start_time, gs.end_time)), 2) AS avg_session_length_minutes,
+    ps.total_gold_earned,
+    ps.in_game_days,
+    COUNT(DISTINCT pa.achievement_id) AS completed_achievements,
+    ROUND(ps.total_gold_earned / ps.in_game_days, 2) AS gold_per_day
+FROM players p
+JOIN game_sessions gs ON p.player_id = gs.player_id
+JOIN player_statistics ps ON p.player_id = ps.player_id
+LEFT JOIN player_achievements pa ON gs.session_id = pa.session_id AND pa.status = 'Completed'
+GROUP BY p.player_id
+ORDER BY avg_session_length_minutes DESC;
