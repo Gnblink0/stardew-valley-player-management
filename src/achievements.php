@@ -20,7 +20,7 @@ if ($playerId) {
 $players = getPlayers();
 
 // 获取所有成就和统计信息
-$achievementStats = getAchievementStats();
+$achievementStats = getAchievementStats($playerId);
 
 // 获取成就大师（拥有最多成就的玩家）
 $achievementMaster = getAchievementMaster();

@@ -211,12 +211,15 @@ function getTopPlayers($limit = 5, $criteria = 'total_gold_earned') {
 function getTopAchievementPlayers($limit = 5) {
     global $pdo;
     $stmt = $pdo->prepare("
-        SELECT p.name AS player_name, COUNT(*) AS completed_achievements
+        SELECT 
+            p.player_id,
+            p.name AS player_name, 
+            COUNT(*) AS completed_achievements
         FROM player_achievements pa
         JOIN game_sessions gs ON pa.session_id = gs.session_id
         JOIN players p ON gs.player_id = p.player_id
         WHERE pa.status = 'completed'
-        GROUP BY gs.player_id
+        GROUP BY p.player_id, p.name
         ORDER BY completed_achievements DESC
         LIMIT :limit
     ");
@@ -387,7 +390,7 @@ function getPlayerPlaytimeStats() {
  * Get achievement statistics
  * @return array Achievement statistics including completion rate and top achievers
  */
-function getAchievementStats() {
+function getAchievementStats($playerId = null) {
     global $pdo;
     
     $stats = [
@@ -403,46 +406,65 @@ function getAchievementStats() {
         $stmt = $pdo->query("SELECT COUNT(*) as total FROM achievements");
         $stats['total_achievements'] = $stmt->fetch()['total'];
         
-        // Get completed achievements count
-        $stmt = $pdo->query("SELECT COUNT(*) as completed FROM player_achievements WHERE status = 'Completed'");
-        $stats['total_completed'] = $stmt->fetch()['completed'];
+        // 构建基础查询
+        $recentAchievementsQuery = "
+            SELECT 
+                a.name as achievement_name,
+                p.name as player_name,
+                pa.status,
+                gs.start_time as completion_date
+            FROM player_achievements pa
+            JOIN achievements a ON pa.achievement_id = a.achievement_id
+            JOIN game_sessions gs ON pa.session_id = gs.session_id
+            JOIN players p ON gs.player_id = p.player_id
+            WHERE pa.status = 'Completed'
+        ";
         
-        // Calculate completion rate
+        // 如果指定了玩家ID，添加玩家过滤条件
+        if ($playerId !== null) {
+            $recentAchievementsQuery .= " AND gs.player_id = :player_id";
+            
+            // 获取该玩家的已完成成就数量
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as completed 
+                FROM player_achievements pa
+                JOIN game_sessions gs ON pa.session_id = gs.session_id
+                WHERE pa.status = 'Completed' 
+                AND gs.player_id = :player_id
+            ");
+            $stmt->bindValue(':player_id', $playerId, PDO::PARAM_INT);
+            $stmt->execute();
+            $stats['total_completed'] = $stmt->fetch()['completed'];
+        } else {
+            // 获取所有玩家的已完成成就总数
+            $stmt = $pdo->query("
+                SELECT COUNT(*) as completed 
+                FROM player_achievements 
+                WHERE status = 'Completed'
+            ");
+            $stats['total_completed'] = $stmt->fetch()['completed'];
+        }
+        
+        // 添加排序和限制
+        $recentAchievementsQuery .= " ORDER BY gs.start_time DESC LIMIT 5";
+        
+        // 执行最近成就查询
+        $stmt = $pdo->prepare($recentAchievementsQuery);
+        if ($playerId !== null) {
+            $stmt->bindValue(':player_id', $playerId, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $stats['recent_achievements'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 计算完成率
         $stats['completion_rate'] = $stats['total_achievements'] > 0 
             ? round(($stats['total_completed'] / $stats['total_achievements']) * 100) 
             : 0;
         
-        // Get top achievers
-        $stmt = $pdo->query("
-            SELECT p.name, p.farm_name, COUNT(pa.achievement_id) as achievement_count
-            FROM players p
-            LEFT JOIN player_achievements pa ON p.player_id = pa.player_id
-            WHERE pa.status = 'Completed'
-            GROUP BY p.player_id, p.name, p.farm_name
-            ORDER BY achievement_count DESC
-            LIMIT 5
-        ");
-        $stats['top_achievers'] = $stmt->fetchAll();
-        
-        // Get recent achievements
-        $stmt = $pdo->query("
-            SELECT 
-                a.name as achievement_name,
-                p.name as player_name,
-                pa.completion_date
-            FROM player_achievements pa
-            JOIN achievements a ON pa.achievement_id = a.achievement_id
-            JOIN players p ON pa.player_id = p.player_id
-            WHERE pa.status = 'Completed'
-            ORDER BY pa.completion_date DESC
-            LIMIT 5
-        ");
-        $stats['recent_achievements'] = $stmt->fetchAll();
-        
         return $stats;
     } catch (PDOException $e) {
         error_log("Error getting achievement stats: " . $e->getMessage());
-        return $stats; // Return default values if there's an error
+        return $stats;
     }
 }
 
