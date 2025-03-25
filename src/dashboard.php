@@ -246,18 +246,6 @@ $cropsBySeason = getCropsBySeason();
                         </div>
                     </div>
                 </div>
-                
-                <!-- Playtime Distribution Chart -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Playtime Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="playtimeChart" width="100%" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
         
@@ -269,21 +257,9 @@ $cropsBySeason = getCropsBySeason();
                 </div>
             </div>
             
-            <div class="row">
-                <!-- Achievement Progress -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Achievement Status Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="achievementStatusChart" width="100%" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
+            <div class="row">                
                 <!-- Top Achievement Holders -->
-                <div class="col-md-6 mb-4">
+                <div class="col-md-12 mb-4">
                     <div class="card">
                         <div class="card-header">
                             <h5>Top Achievement Holders</h5>
@@ -357,26 +333,14 @@ $cropsBySeason = getCropsBySeason();
             </div>
             
             <div class="row">
-                <!-- Session Activity Calendar -->
-                <div class="col-md-6 mb-4">
+            <!-- Playtime Distribution Chart -->
+                <div class="col-md-12 mb-4">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Session Activity</h5>
+                            <h5>Playtime Distribution</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="sessionActivityChart" width="100%" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Average Session Duration -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Average Session Duration</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="sessionDurationChart" width="100%" height="300"></canvas>
+                            <canvas id="playtimeChart" width="100%" height="300"></canvas>
                         </div>
                     </div>
                 </div>
