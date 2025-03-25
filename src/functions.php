@@ -280,4 +280,91 @@ function deletePlayer($playerId) {
         return false;
     }
 }
-?>
+
+// Function to get player statistics
+function getPlayerStatistics($playerId) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM player_statistics WHERE player_id = ?");
+        $stmt->execute([$playerId]);
+        return $stmt->fetch();
+    } catch (PDOException $e) {
+        error_log("Error getting player statistics: " . $e->getMessage());
+        return false;
+    }
+}
+
+// 获取玩家作物数据
+function getPlayerCrops($playerId) {
+    global $pdo;
+    
+    try {
+        $sql = "SELECT c.crop_id, c.name, c.season, 
+                       pch.harvested, pch.sold
+                FROM crops c
+                JOIN player_crops_harvested pch ON c.crop_id = pch.crop_id
+                WHERE pch.player_id = ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$playerId]);
+        
+        $crops = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 如果没有数据，返回空数组而不是 false
+        return $crops;
+    } catch (PDOException $e) {
+        error_log("Error getting player crops: " . $e->getMessage());
+        return false;
+    }
+}
+
+// 获取玩家动物数据
+function getPlayerAnimals($playerId) {
+    global $pdo;
+    
+    try {
+        $sql = "SELECT a.animal_id, a.name, at.name as type, 
+                       CASE 
+                           WHEN ba.animal_id IS NOT NULL THEN 'barn' 
+                           WHEN ca.animal_id IS NOT NULL THEN 'coop' 
+                           ELSE 'unknown' 
+                       END as building,
+                       ap.produce_type as produce, a.image_url,
+                       pao.friendship_level, pao.owned as days_owned
+                FROM animals a
+                JOIN animal_types at ON a.type_id = at.type_id
+                LEFT JOIN barn_animals ba ON a.animal_id = ba.animal_id
+                LEFT JOIN coop_animals ca ON a.animal_id = ca.animal_id
+                LEFT JOIN animal_produce ap ON a.type_id = ap.type_id
+                JOIN player_animals_owned pao ON a.animal_id = pao.animal_id
+                WHERE pao.player_id = ? AND pao.owned = 1";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$playerId]);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        error_log("Error getting player animals: " . $e->getMessage());
+        return false;
+    }
+}
+
+// 获取玩家库存数据
+function getPlayerInventory($playerId) {
+    global $pdo;
+    
+    try {
+        $sql = "SELECT i.item_id, i.name, i.type, i.value, i.image_url,
+                       inv.quantity
+                FROM items i
+                JOIN inventory inv ON i.item_id = inv.item_id
+                WHERE inv.player_id = ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$playerId]);
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        error_log("Error getting player inventory: " . $e->getMessage());
+        return false;
+    }
+}?>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stardew Valley - Select Player</title>
+    <link rel="stylesheet" href="../css/login.css" />
+    <style>
+      .player-list {
+        margin-top: 20px;
+      }
+      .player-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f5f7ea;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .player-item:hover {
+        background-color: #e0e5c1;
+      }
+      .player-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        overflow: hidden;
+      }
+      .player-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .player-info h3 {
+        margin: 0;
+        color: #4e7c37;
+      }
+      .player-info p {
+        margin: 5px 0 0;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar">
+        <h1>Stardew Valley</h1>
+        <p>Welcome to the Stardew Valley Player Management System!</p>
+        <p>Select a player to view their farm data.</p>
+      </div>
+
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Select Player</h2>
+        </div>
+
+        <div class="player-list" id="player-list">
+          <!-- 玩家列表将通过JavaScript动态添加 -->
+          <div class="loading">Loading players...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 从服务器获取所有玩家
+        fetch("../../api/players.php")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              renderPlayerList(data.data);
+            } else {
+              document.getElementById(
+                "player-list"
+              ).innerHTML = `<p>Error: ${data.message}</p>`;
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching players:", error);
+            document.getElementById("player-list").innerHTML =
+              "<p>Error connecting to server. Please try again later.</p>";
+          });
+      });
+
+      function renderPlayerList(players) {
+        const playerList = document.getElementById("player-list");
+        playerList.innerHTML = "";
+
+        if (!players || players.length === 0) {
+          playerList.innerHTML = "<p>No players found.</p>";
+          return;
+        }
+
+        players.forEach((player) => {
+          const playerItem = document.createElement("div");
+          playerItem.className = "player-item";
+          playerItem.setAttribute("data-player-id", player.player_id);
+
+          const avatarSrc = player.avatar
+            ? `../images/${player.avatar}.png`
+            : "../images/farmer1.png";
+
+          playerItem.innerHTML = `
+                    <div class="player-avatar">
+                        <img src="${avatarSrc}" alt="${player.name}">
+                    </div>
+                    <div class="player-info">
+                        <h3>${player.name}</h3>
+                        <p>${player.farm_name || "Farm"}</p>
+                    </div>
+                `;
+
+          playerItem.addEventListener("click", function () {
+            window.location.href = `data.html?id=${player.player_id}`;
+          });
+
+          playerList.appendChild(playerItem);
+        });
+      }
+    </script>
+  </body>
+</html>
