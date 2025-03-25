@@ -365,3 +365,4 @@ function getPlayerInventory($playerId) {
         return false;
     }
 }?>
+
