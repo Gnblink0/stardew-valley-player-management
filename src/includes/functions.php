@@ -45,57 +45,32 @@ function getPlayerSessions($playerId) {
 }
 
 // Function to get achievements
-function getAchievements($playerId = null) {
+function getAchievements() {
     global $pdo;
-    
+
     try {
-        if ($playerId) {
-            $stmt = $pdo->prepare("
-                SELECT 
-                    a.*,
-                    COALESCE(pa.status, 'Not Started') as status,
-                    COALESCE(pa.progress, 0) as progress
-                FROM achievements a
-                LEFT JOIN player_achievements pa ON a.achievement_id = pa.achievement_id 
-                    AND pa.player_id = :player_id
-                ORDER BY a.category, a.name
-            ");
-            $stmt->bindValue(':player_id', $playerId, PDO::PARAM_INT);
-            $stmt->execute();
-        } else {
-            $stmt = $pdo->query("
-                SELECT 
-                    a.*,
-                    'Not Started' as status,
-                    0 as progress,
-                    (
-                        SELECT COUNT(*)
-                        FROM player_achievements pa
-                        WHERE pa.achievement_id = a.achievement_id
-                        AND pa.status = 'Completed'
-                    ) as completion_count
-                FROM achievements a
-                ORDER BY a.category, a.name
-            ");
-        }
-        
+        $stmt = $pdo->query("
+            SELECT 
+                achievement_id,
+                name,
+                goal
+            FROM achievements
+            ORDER BY name
+        ");
+
         $achievements = $stmt->fetchAll();
-        
-        // Ensure all required fields have default values
+
         foreach ($achievements as &$achievement) {
-            $achievement['status'] = $achievement['status'] ?? 'Not Started';
-            $achievement['progress'] = $achievement['progress'] ?? 0;
-            $achievement['description'] = $achievement['description'] ?? $achievement['goal'];
-            $achievement['reward'] = $achievement['reward'] ?? 0;
-            $achievement['category'] = $achievement['category'] ?? 'General';
+            $achievement['status'] = 'Not Started';
         }
-        
+
         return $achievements;
     } catch (PDOException $e) {
-        error_log("Error getting achievements: " . $e->getMessage());
+        error_log("Error getting all achievements: " . $e->getMessage());
         return [];
     }
 }
+
 
 // Function to get player achievements
 function getPlayerAchievements($playerId) {
@@ -569,42 +544,6 @@ function getCropsBySeason() {
         return $stmt->fetchAll();
     } catch (PDOException $e) {
         error_log("Error getting crops by season: " . $e->getMessage());
-        return [];
-    }
-}
-
-/**
- * Get most valuable items
- * @param int $limit Number of items to return
- * @return array Most valuable items with their statistics
- */
-function getMostValuableItems($limit = 5) {
-    global $pdo;
-    
-    try {
-        $stmt = $pdo->prepare("
-            SELECT 
-                i.item_id,
-                i.name as item_name,
-                i.type as item_type,
-                i.base_price as unit_price,
-                SUM(inv.quantity) as quantity,
-                SUM(inv.quantity * i.base_price) as total_value,
-                p.name as player_name
-            FROM inventory inv
-            JOIN items i ON inv.item_id = i.item_id
-            JOIN players p ON inv.player_id = p.player_id
-            GROUP BY i.item_id, p.player_id
-            ORDER BY total_value DESC
-            LIMIT :limit
-        ");
-        
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        return $stmt->fetchAll();
-    } catch (PDOException $e) {
-        error_log("Error getting most valuable items: " . $e->getMessage());
         return [];
     }
 }

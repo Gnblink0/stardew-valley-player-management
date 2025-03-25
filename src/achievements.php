@@ -13,6 +13,9 @@ if ($playerId) {
     $achievements = getAchievements();
 }
 
+// Debug: Check if achievements are being returned
+// echo '<pre>'; print_r($achievements); echo '</pre>';
+
 // Get all players for filter dropdown
 $players = getPlayers();
 
