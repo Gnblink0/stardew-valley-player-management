@@ -211,12 +211,15 @@ function getTopPlayers($limit = 5, $criteria = 'total_gold_earned') {
 function getTopAchievementPlayers($limit = 5) {
     global $pdo;
     $stmt = $pdo->prepare("
-        SELECT p.name AS player_name, COUNT(*) AS completed_achievements
+        SELECT 
+            p.player_id,
+            p.name AS player_name, 
+            COUNT(*) AS completed_achievements
         FROM player_achievements pa
         JOIN game_sessions gs ON pa.session_id = gs.session_id
         JOIN players p ON gs.player_id = p.player_id
         WHERE pa.status = 'completed'
-        GROUP BY gs.player_id
+        GROUP BY p.player_id, p.name
         ORDER BY completed_achievements DESC
         LIMIT :limit
     ");

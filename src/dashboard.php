@@ -81,6 +81,10 @@ $cropsBySeason = getCropsBySeason();
     .rank-actions {
         margin-left: 15px;
     }
+    
+    .achievement-row:hover {
+        background-color: rgba(0, 0, 0, 0.075) !important;
+    }
 </style>
 
 <div class="row">
@@ -332,10 +336,16 @@ $cropsBySeason = getCropsBySeason();
                                     </thead>
                                     <tbody>
                                         <?php foreach ($topAchievements as $index => $player): ?>
-                                        <tr>
+                                        <tr class="achievement-row" style="cursor: pointer;" 
+                                            onclick="window.location.href='achievements.php?player_id=<?php echo isset($player['player_id']) ? htmlspecialchars($player['player_id']) : ''; ?>'">
                                             <td><?php echo $index + 1; ?></td>
-                                            <td><?php echo htmlspecialchars($player['player_name']); ?></td>
-                                            <td><?php echo $player['completed_achievements']; ?></td>
+                                            <td>
+                                                <a href="achievements.php?player_id=<?php echo isset($player['player_id']) ? htmlspecialchars($player['player_id']) : ''; ?>" 
+                                                   class="text-decoration-none text-dark">
+                                                    <?php echo isset($player['player_name']) ? htmlspecialchars($player['player_name']) : 'Unknown Player'; ?>
+                                                </a>
+                                            </td>
+                                            <td><?php echo isset($player['completed_achievements']) ? $player['completed_achievements'] : 0; ?></td>
                                             <td>
                                                 <?php
                                                 // Calculate completion percentage
@@ -346,11 +356,15 @@ $cropsBySeason = getCropsBySeason();
                                                 $stmt->execute();
                                                 $totalAchievements = $stmt->fetch()['total'];
                                                 
-                                                $percentage = round(($player['completed_achievements'] / $totalAchievements) * 100);
+                                                $completedAchievements = isset($player['completed_achievements']) ? $player['completed_achievements'] : 0;
+                                                $percentage = $totalAchievements > 0 ? round(($completedAchievements / $totalAchievements) * 100) : 0;
                                                 ?>
                                                 <div class="progress">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percentage; ?>%" 
-                                                         aria-valuenow="<?php echo $percentage; ?>" aria-valuemin="0" aria-valuemax="100">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: <?php echo $percentage; ?>%" 
+                                                         aria-valuenow="<?php echo $percentage; ?>" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
                                                         <?php echo $percentage; ?>%
                                                     </div>
                                                 </div>
