@@ -28,25 +28,13 @@ include 'components/header.php';
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Achievements</h1>
-        <div class="d-flex">
-            <div class="me-3">
-                <select class="form-select" id="categoryFilter">
-                    <option value="">All Categories</option>
-                    <option value="Farming">Farming</option>
-                    <option value="Mining">Mining</option>
-                    <option value="Fishing">Fishing</option>
-                    <option value="Social">Social</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div>
-                <select class="form-select" id="statusFilter">
-                    <option value="">All Status</option>
-                    <option value="Completed">Completed</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Not Started">Not Started</option>
-                </select>
-            </div>
+        <div>
+            <select class="form-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Completed">Completed</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Not Started">Not Started</option>
+            </select>
         </div>
     </div>
 
@@ -137,16 +125,10 @@ include 'components/header.php';
                                     <?php echo $achievement['status']; ?>
                                 </span>
                             </div>
-                            <p class="card-text text-muted mb-3"><?php echo htmlspecialchars($achievement['description']); ?></p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-secondary"><?php echo $achievement['category']; ?></span>
-                                <?php if ($achievement['reward']): ?>
-                                <span class="text-warning">
-                                    <i class="fas fa-coins"></i> <?php echo formatGold($achievement['reward']); ?>
-                                </span>
-                                <?php endif; ?>
-                            </div>
-                            <?php if ($achievement['progress']): ?>
+                            <p class="card-text text-muted mb-3">
+                                <?php echo isset($achievement['goal']) ? htmlspecialchars($achievement['goal']) : 'No goal available'; ?>
+                            </p>
+                            <?php if (isset($achievement['progress']) && $achievement['progress'] !== null): ?>
                             <div class="mt-3">
                                 <div class="progress" style="height: 5px;">
                                     <div class="progress-bar" role="progressbar" 
@@ -168,28 +150,26 @@ include 'components/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const categoryFilter = document.getElementById('categoryFilter');
     const statusFilter = document.getElementById('statusFilter');
     const achievementsGrid = document.getElementById('achievements-grid');
 
     function filterAchievements() {
-        const category = categoryFilter.value;
         const status = statusFilter.value;
         
         const cards = achievementsGrid.getElementsByClassName('col-md-6');
         
         Array.from(cards).forEach(card => {
-            const cardCategory = card.querySelector('.badge.bg-secondary').textContent;
-            const cardStatus = card.querySelector('.badge:not(.bg-secondary)').textContent;
+            const statusElement = card.querySelector('.badge');
             
-            const categoryMatch = !category || cardCategory === category;
+            // 安全地获取状态文本
+            const cardStatus = statusElement ? statusElement.textContent.trim() : '';
+            
             const statusMatch = !status || cardStatus === status;
             
-            card.style.display = categoryMatch && statusMatch ? '' : 'none';
+            card.style.display = statusMatch ? '' : 'none';
         });
     }
 
-    categoryFilter.addEventListener('change', filterAchievements);
     statusFilter.addEventListener('change', filterAchievements);
 });
 </script>
