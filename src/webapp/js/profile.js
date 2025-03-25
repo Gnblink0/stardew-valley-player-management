@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const cancelEditBtn = document.getElementById("cancel-edit-btn");
   const backBtn = document.getElementById("back-btn");
   const editProfileForm = document.getElementById("edit-profile-form");
+  const viewDataBtn = document.getElementById("view-data-btn");
 
   // 添加调试语句
   console.log("Edit Profile Button:", editProfileBtn);
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log("Cancel Edit Button:", cancelEditBtn);
   console.log("Back Button:", backBtn);
   console.log("Edit Profile Form:", editProfileForm);
+  console.log("View Farm Data Button:", viewDataBtn);
 
   // 绑定按钮点击事件
   if (editProfileBtn) {
@@ -110,6 +112,26 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log("Back button clicked");
       window.location.href = "player_select.html";
     });
+  }
+
+  if (viewDataBtn) {
+    viewDataBtn.addEventListener("click", function () {
+      console.log("View Farm Data button clicked");
+
+      // 获取当前URL中的玩家ID
+      const urlParams = new URLSearchParams(window.location.search);
+      const playerId = urlParams.get("id");
+
+      // 跳转到data.html页面，并传递玩家ID
+      if (playerId) {
+        window.location.href = `data.html?id=${playerId}`;
+      } else {
+        console.error("Player ID not found");
+        alert("Cannot navigate to farm data: Player ID not found");
+      }
+    });
+  } else {
+    console.error("View Farm Data button not found");
   }
 
   // 获取玩家数据
