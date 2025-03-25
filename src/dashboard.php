@@ -261,41 +261,6 @@ $cropsBySeason = getCropsBySeason();
             </div>
         </section>
         
-        <!-- Farm statistics -->
-        <section id="farm-stats" class="mb-5">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <h2 class="h4">Farm Statistics</h2>
-                </div>
-            </div>
-            
-            <div class="row">
-                <!-- Crops by Season -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Crops by Season</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="seasonalCropsChart" width="100%" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Animal Distribution -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Animal Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="animalDistributionChart" width="100%" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
         <!-- Achievements section -->
         <section id="achievements" class="mb-5">
             <div class="row mb-3">
