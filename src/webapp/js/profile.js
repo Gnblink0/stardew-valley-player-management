@@ -1,5 +1,151 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Fetch player data (in a real app, this would come from an API/backend)
+  // 获取URL参数中的玩家ID
+  const urlParams = new URLSearchParams(window.location.search);
+  const playerId = urlParams.get("id");
+
+  if (!playerId) {
+    alert("No player ID provided!");
+    window.location.href = "player_select.html";
+    return;
+  }
+
+  // 全局变量，用于存储玩家数据
+  let playerData = null;
+
+  // 获取DOM元素
+  const editProfileBtn = document.getElementById("edit-profile-btn");
+  const saveProfileBtn = document.getElementById("save-profile-btn");
+  const cancelEditBtn = document.getElementById("cancel-edit-btn");
+  const backBtn = document.getElementById("back-btn");
+  const editProfileForm = document.getElementById("edit-profile-form");
+
+  // 添加调试语句
+  console.log("Edit Profile Button:", editProfileBtn);
+  console.log("Save Profile Button:", saveProfileBtn);
+  console.log("Cancel Edit Button:", cancelEditBtn);
+  console.log("Back Button:", backBtn);
+  console.log("Edit Profile Form:", editProfileForm);
+
+  // 绑定按钮点击事件
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", function () {
+      console.log("Edit Profile button clicked");
+
+      // 检查playerData是否已加载
+      if (!playerData) {
+        console.error("Player data not loaded yet");
+        alert("Please wait for player data to load");
+        return;
+      }
+
+      // 显示编辑表单
+      if (editProfileForm) {
+        editProfileForm.style.display = "block";
+
+        // 填充表单字段
+        document.getElementById("edit-player-name").value = playerData.name;
+        document.getElementById("edit-farm-name").value =
+          playerData.farm_name || "";
+      } else {
+        console.error("Edit profile form not found");
+      }
+    });
+  } else {
+    console.error("Edit profile button not found");
+  }
+
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", function () {
+      console.log("Save Profile button clicked");
+      // 获取表单数据
+      const playerName = document.getElementById("edit-player-name").value;
+      const farmName = document.getElementById("edit-farm-name").value;
+
+      // 验证数据
+      if (!playerName.trim()) {
+        alert("Player name cannot be empty!");
+        return;
+      }
+
+      // 准备要发送的数据
+      const formData = new FormData();
+      formData.append("id", playerId);
+      formData.append("name", playerName);
+      formData.append("farm_name", farmName);
+
+      // 发送更新请求
+      fetch("../../api/update_player.php", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            alert("Profile updated successfully!");
+            // 隐藏编辑表单
+            editProfileForm.style.display = "none";
+            // 刷新页面以显示更新后的数据
+            location.reload();
+          } else {
+            alert("Failed to update profile: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error updating profile:", error);
+          alert("An error occurred while updating the profile.");
+        });
+    });
+  }
+
+  if (cancelEditBtn) {
+    cancelEditBtn.addEventListener("click", function () {
+      console.log("Cancel Edit button clicked");
+      // 隐藏编辑表单
+      editProfileForm.style.display = "none";
+    });
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener("click", function () {
+      console.log("Back button clicked");
+      window.location.href = "player_select.html";
+    });
+  }
+
+  // 获取玩家数据
+  fetchPlayerData();
+
+  // 获取玩家数据的函数
+  function fetchPlayerData() {
+    fetch(`../../api/player.php?id=${playerId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          playerData = data.data;
+          console.log("Player data received:", playerData);
+
+          // 填充页面数据
+          populatePlayerInfo(playerData);
+          populatePlayerStats(playerData);
+          populateGameSessions(playerData.gameSessions);
+          populateAchievements(playerData.achievements);
+
+          // 如果有每周游戏时间数据，则填充
+          if (playerData.weeklyPlaytime) {
+            populateWeeklyPlaytime(playerData.weeklyPlaytime);
+          }
+        } else {
+          console.error("Error fetching player data:", data.message);
+          alert("Failed to load player data: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while loading player data.");
+      });
+  }
+
+  // Fetch player data
   fetchPlayerData()
     .then((playerData) => {
       try {
@@ -10,23 +156,31 @@ document.addEventListener("DOMContentLoaded", function () {
         if (document.getElementById("weekly-playtime-chart")) {
           populateWeeklyPlaytime(playerData.weeklyPlaytime);
 
-          // Set up weekly playtime selector (only if it exists)
+          // 设置周选择器（如果存在）
           const weekSelector = document.getElementById("week-selector");
           if (weekSelector) {
             weekSelector.addEventListener("change", function (e) {
               const weekNumber = parseInt(e.target.value);
-              // Fetch data for the selected week and update the chart
+              // 获取所选周的数据并更新图表
               fetchWeeklyPlaytime(weekNumber).then((weeklyData) => {
                 updateWeeklyPlaytimeChart(weeklyData);
-                // Calculate and display average instead of showing the table
+                // 计算并显示平均值而不是显示表格
                 displayWeeklyAverage(weeklyData);
               });
             });
           }
         }
 
+        // 填充游戏会话数据
         populateGameSessions(playerData.gameSessions);
-        populateAchievements(playerData.achievements);
+
+        // 填充成就数据 - 确保使用正确的属性名
+        if (playerData.achievements) {
+          console.log("Populating achievements:", playerData.achievements);
+          populateAchievements(playerData.achievements);
+        } else {
+          console.warn("No achievements data found in player data");
+        }
       } catch (err) {
         console.error("Error populating data:", err);
       }
@@ -34,14 +188,6 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch((error) => {
       console.error("Error loading player data:", error);
     });
-
-  // Set up event listeners (only if elements exist)
-  const backBtn = document.getElementById("back-btn");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      window.location.href = "player_select.html";
-    });
-  }
 });
 
 // For demo purposes, return mock data
@@ -305,41 +451,81 @@ function populateAchievements(achievements) {
   // Clear existing content
   achievementsContainer.innerHTML = "";
 
-  // Calculate overall progress
+  // 检查成就数据是否存在
+  if (!achievements || achievements.length === 0) {
+    achievementsContainer.innerHTML = "<p>No achievements found.</p>";
+    return;
+  }
+
+  // 计算总体进度
   const completedCount = achievements.filter((a) => a.completed).length;
   const overallProgress = (completedCount / achievements.length) * 100;
 
-  // Update progress bar and text
-  const progressBar = document.getElementById("overall-achievement-progress");
-  const progressText = document.getElementById("achievement-progress-text");
+  // 创建进度条容器（如果不存在）
+  let progressContainer = document.querySelector(".overall-progress-container");
+  let progressBar, progressText;
 
+  if (!progressContainer) {
+    progressContainer = document.createElement("div");
+    progressContainer.className = "overall-progress-container";
+
+    progressBar = document.createElement("div");
+    progressBar.id = "overall-achievement-progress";
+    progressBar.className = "overall-progress-bar";
+
+    progressText = document.createElement("div");
+    progressText.id = "achievement-progress-text";
+    progressText.className = "progress-text";
+
+    progressContainer.appendChild(progressBar);
+    progressContainer.appendChild(progressText);
+
+    // 将进度条添加到页面
+    const progressElement = document.querySelector(".achievement-progress");
+    if (progressElement) {
+      progressElement.appendChild(progressContainer);
+    }
+  } else {
+    progressBar = document.getElementById("overall-achievement-progress");
+    progressText = document.getElementById("achievement-progress-text");
+  }
+
+  // 更新进度条和文本
   if (progressBar) progressBar.style.width = overallProgress + "%";
   if (progressText)
     progressText.textContent = Math.round(overallProgress) + "%";
 
-  // Add achievement cards
+  // 添加成就卡片
   achievements.forEach((achievement) => {
     const achievementElement = template.content.cloneNode(true);
     const card = achievementElement.querySelector(".achievement-card");
 
-    card.dataset.achievementId = achievement.id;
-    card.querySelector(".achievement-name").textContent = achievement.name;
-    card.querySelector(".achievement-goal").textContent =
-      achievement.description;
+    // 设置成就ID (使用achievement_id而不是id)
+    card.dataset.achievementId = achievement.achievement_id || achievement.id;
 
-    // Set status indicator
-    const statusElement = card.querySelector(".achievement-status");
-    if (achievement.completed) {
-      statusElement.classList.add("completed");
-      statusElement.title = "Completed";
-    } else {
-      statusElement.classList.add("in-progress");
-      statusElement.title = "In Progress";
+    // 设置成就名称
+    const nameElement = card.querySelector(".achievement-name");
+    if (nameElement) {
+      nameElement.textContent = achievement.name;
     }
 
-    // Set progress bar
-    const progressBar = card.querySelector(".achievement-progress-bar");
-    progressBar.style.width = achievement.progress + "%";
+    // 设置成就目标描述 (使用goal而不是description)
+    const goalElement = card.querySelector(".achievement-goal");
+    if (goalElement) {
+      goalElement.textContent = achievement.goal || achievement.description;
+    }
+
+    // 设置状态指示器
+    const statusElement = card.querySelector(".achievement-status");
+    if (statusElement) {
+      if (achievement.completed) {
+        statusElement.classList.add("completed");
+        statusElement.title = "Completed";
+      } else {
+        statusElement.classList.add("in-progress");
+        statusElement.title = "In Progress";
+      }
+    }
 
     achievementsContainer.appendChild(achievementElement);
   });

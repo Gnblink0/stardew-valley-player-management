@@ -45,17 +45,6 @@ if ($playerData) {
                 'completed' => ($achievement['status'] === 'completed')
             ];
             
-            // 如果前端需要进度信息，我们可以基于status提供一个简单的值
-            // 而不是随机生成
-            if ($achievement['status'] === 'completed') {
-                $achievementData['progress'] = 100;
-            } else if ($achievement['status'] === 'not_started') {
-                $achievementData['progress'] = 0;
-            } else {
-                // 对于"in_progress"状态，使用一个固定值而不是随机值
-                $achievementData['progress'] = 50;
-            }
-            
             $playerData['achievements'][] = $achievementData;
         }
     } else {
