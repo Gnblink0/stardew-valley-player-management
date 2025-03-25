@@ -254,62 +254,6 @@ $cropsBySeason = getCropsBySeason();
                         </div>
                     </div>
                 </div>
-                
-                <!-- Top Players Table -->
-                <div class="col-md-12 mb-4">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5>Top Players Leaderboard</h5>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary active" id="sort-by-gold">By Gold</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="sort-by-days">By Days Played</button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Player</th>
-                                            <th>Farm Name</th>
-                                            <th>Gold Earned</th>
-                                            <th>In-Game Days</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $stmt = $pdo->query("
-                                            SELECT p.player_id, p.name, p.farm_name, ps.total_gold_earned, ps.in_game_days
-                                            FROM players p
-                                            JOIN player_statistics ps ON p.player_id = ps.player_id
-                                            ORDER BY ps.total_gold_earned DESC
-                                            LIMIT 10
-                                        ");
-                                        $players = $stmt->fetchAll();
-                                        
-                                        foreach ($players as $index => $player):
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $index + 1; ?></td>
-                                            <td><?php echo htmlspecialchars($player['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($player['farm_name']); ?></td>
-                                            <td><?php echo formatGold($player['total_gold_earned']); ?></td>
-                                            <td><?php echo $player['in_game_days']; ?></td>
-                                            <td>
-                                                <a href="players.php?id=<?php echo $player['player_id']; ?>" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
         
