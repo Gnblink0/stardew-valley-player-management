@@ -536,7 +536,6 @@ include 'components/header.php';
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Player List</h5>
-                            <input type="text" id="playerSearch" class="form-control form-control-sm w-25" placeholder="Search...">
                         </div>
                     </div>
                     <div class="card-body">

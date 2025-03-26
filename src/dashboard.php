@@ -11,7 +11,7 @@ $cropsBySeason = getCropsBySeason();
 
 <?php include 'components/header.php'; ?>
 
-<!-- 添加排名区域的 CSS 样式 -->
+
 <style>
     .top-players-list {
         margin-top: 10px;
@@ -88,7 +88,6 @@ $cropsBySeason = getCropsBySeason();
 </style>
 
 <head>
-    <!-- ... 其他 head 内容 ... -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -102,27 +101,6 @@ $cropsBySeason = getCropsBySeason();
         <!-- Page title and filter controls -->
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Stardew Valley Analytics Dashboard</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group me-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-data">
-                        <i class="fas fa-sync-alt me-1"></i> Refresh
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="export-data">
-                        <i class="fas fa-download me-1"></i> Export
-                    </button>
-                </div>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-calendar me-1"></i> All Time
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
-                        <li><a class="dropdown-item active" href="#">All Time</a></li>
-                        <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
-                        <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
-                        <li><a class="dropdown-item" href="#">Last Year</a></li>
-                    </ul>
-                </div>
-            </div>
         </div>
         
         <!-- Key metrics -->
@@ -137,13 +115,13 @@ $cropsBySeason = getCropsBySeason();
                 <!-- Total Players -->
                 <div class="col-md-3 mb-4">
                     <div class="metric-card">
+                        <div class="ms-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <div class="text-secondary mb-1">Total Players</div>
                                 <div class="metric-value"><?php echo count(getPlayers()); ?></div>
-                            </div>
-                            <div class="ms-3">
-                                <i class="fas fa-users fa-2x text-primary"></i>
                             </div>
                         </div>
                     </div>
@@ -154,15 +132,15 @@ $cropsBySeason = getCropsBySeason();
                     <div class="metric-card">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
+                                <div class="ms-3">
+                                    <i class="fas fa-coins fa-2x text-warning"></i>
+                                </div>
                                 <div class="text-secondary mb-1">Total Gold Earned</div>
                                 <?php
                                 $stmt = $pdo->query("SELECT SUM(total_gold_earned) as total FROM player_statistics");
                                 $totalGold = $stmt->fetch()['total'];
                                 ?>
                                 <div class="metric-value"><?php echo formatGold($totalGold); ?></div>
-                            </div>
-                            <div class="ms-3">
-                                <i class="fas fa-coins fa-2x text-warning"></i>
                             </div>
                         </div>
                     </div>
@@ -173,6 +151,9 @@ $cropsBySeason = getCropsBySeason();
                     <div class="metric-card">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
+                            <div class="ms-3">
+                                <i class="far fa-clock fa-2x text-info"></i>
+                            </div>
                                 <div class="text-secondary mb-1">Total Playtime</div>
                                 <?php
                                 $stmt = $pdo->query("SELECT SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)) as total_minutes FROM game_sessions");
@@ -180,9 +161,6 @@ $cropsBySeason = getCropsBySeason();
                                 $totalHours = round($totalMinutes / 60, 1);
                                 ?>
                                 <div class="metric-value"><?php echo $totalHours; ?> hrs</div>
-                            </div>
-                            <div class="ms-3">
-                                <i class="far fa-clock fa-2x text-info"></i>
                             </div>
                         </div>
                     </div>
@@ -193,15 +171,15 @@ $cropsBySeason = getCropsBySeason();
                     <div class="metric-card">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
+                                <div class="ms-3">
+                                    <i class="fas fa-trophy fa-2x text-success"></i>
+                                </div>
                                 <div class="text-secondary mb-1">Achievements Completed</div>
                                 <?php
                                 $stmt = $pdo->query("SELECT COUNT(*) as count FROM player_achievements WHERE status = 'Completed'");
                                 $completedCount = $stmt->fetch()['count'];
                                 ?>
                                 <div class="metric-value"><?php echo $completedCount; ?></div>
-                            </div>
-                            <div class="ms-3">
-                                <i class="fas fa-trophy fa-2x text-success"></i>
                             </div>
                         </div>
                     </div>
@@ -414,44 +392,44 @@ $cropsBySeason = getCropsBySeason();
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 获取并显示排名数据（默认按金币排名）
+        // fetch and display top players
         fetchTopPlayers('total_gold_earned');
         fetchPlaytimeDistribution();
         fetchSessionAnalytics();
 
-        // 为排名标签添加点击事件
+        // add click event to ranking buttons
         const rankingButtons = document.querySelectorAll('.card-header .btn-group button');
         rankingButtons.forEach(button => {
             button.addEventListener('click', function() {
-                // 移除所有按钮的 active 类
+                // remove active class from all buttons
                 rankingButtons.forEach(btn => btn.classList.remove('active'));
-                // 为当前点击的按钮添加 active 类
+                // add active class to current button
                 this.classList.add('active');
-                // 获取排名标准
+                // get ranking criteria
                 const criteria = this.getAttribute('data-criteria');
-                // 获取并显示排名数据
+                // fetch and display top players
                 fetchTopPlayers(criteria);
             });
         });
 
-        // 添加导出按钮事件监听
+        // add export button event listener
         document.getElementById('export-data').addEventListener('click', exportToPDF);
         
-        // 添加刷新按钮事件监听
+        // add refresh button event listener
         document.getElementById('refresh-data').addEventListener('click', async function() {
             const refreshBtn = this;
             const originalText = refreshBtn.innerHTML;
             
-            // 显示加载状态
+            // show loading state
             refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
             refreshBtn.disabled = true;
             
             try {
-                // 获取当前选中的排名标准
+                // get current ranking criteria
                 const activeRankingButton = document.querySelector('.card-header .btn-group button.active');
                 const criteria = activeRankingButton ? activeRankingButton.getAttribute('data-criteria') : 'total_gold_earned';
                 
-                // 依次刷新所有数据，使用 await 以便于错误处理
+                // fetch and display top players
                 console.log('Fetching top players...');
                 const topPlayersResponse = await fetch(`api/top_players.php?criteria=${criteria}`);
                 if (!topPlayersResponse.ok) throw new Error(`Failed to fetch top players: ${topPlayersResponse.status}`);
@@ -482,7 +460,7 @@ $cropsBySeason = getCropsBySeason();
                     throw new Error(sessionData.message || 'Failed to load session analytics');
                 }
                 
-                // 显示成功提示
+                // show success message
                 const toastDiv = document.createElement('div');
                 toastDiv.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
                 toastDiv.innerHTML = `
@@ -502,14 +480,14 @@ $cropsBySeason = getCropsBySeason();
                 console.error('Error refreshing data:', error);
                 alert(`Failed to refresh data: ${error.message}`);
             } finally {
-                // 恢复按钮状态
+                // restore button state
                 refreshBtn.innerHTML = originalText;
                 refreshBtn.disabled = false;
             }
         });
     });
     
-    // 获取排名数据
+    // fetch top players
     function fetchTopPlayers(criteria) {
         const topPlayersList = document.getElementById('top-players-list');
         topPlayersList.innerHTML = `
@@ -542,7 +520,7 @@ $cropsBySeason = getCropsBySeason();
     }
 
     
-    // 渲染排名数据
+    // render top players
     function renderTopPlayers(players, criteria) {
         const topPlayersList = document.getElementById('top-players-list');
         topPlayersList.innerHTML = '';
@@ -559,13 +537,13 @@ $cropsBySeason = getCropsBySeason();
             rankItem.className = 'rank-item';
             rankItem.setAttribute('data-player-id', player.player_id);
             
-            // 根据排名标准显示不同的分数标签
+            // display different score labels based on ranking criteria
             const scoreLabel = criteria === 'total_gold_earned' ? 'Gold' : 'Days';
             const scoreValue = criteria === 'total_gold_earned' 
                 ? formatGold(player.score) 
                 : player.score;
             
-            // 为前三名添加特殊样式
+            // add special style to top 3 players
             const positionClass = index < 3 ? ` top-${index + 1}` : '';
             
             rankItem.innerHTML = `
@@ -588,12 +566,12 @@ $cropsBySeason = getCropsBySeason();
         topPlayersList.appendChild(fragment);
     }
     
-    // 格式化金币数字（添加千位分隔符和 g 后缀）
+    // format gold number (add comma and g suffix)
     function formatGold(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'g';
     }
 
-    // 获取和渲染游戏时间分布数据
+    // fetch and render playtime distribution data
     function fetchPlaytimeDistribution() {
         fetch('api/playtime_distribution.php')
             .then(response => {
@@ -622,16 +600,16 @@ $cropsBySeason = getCropsBySeason();
             });
     }
 
-    // 渲染游戏时间分布图表
+    // render playtime distribution chart
     function renderPlaytimeChart(data) {
         const ctx = document.getElementById('playtimeChart').getContext('2d');
         
-        // 销毁现有图表（如果存在）
+        // destroy existing chart (if exists)
         if (window.playtimeChart instanceof Chart) {
             window.playtimeChart.destroy();
         }
         
-        // 确保数据存在且格式正确
+        // ensure data exists and is correct format
         if (!data || !data.labels || !data.values) {
             console.error('Invalid playtime data format:', data);
             return;
@@ -684,7 +662,7 @@ $cropsBySeason = getCropsBySeason();
         });
     }
 
-    // 获取会话分析数据
+    // fetch session analytics data
     function fetchSessionAnalytics() {
         fetch('api/session_analytics.php')
             .then(response => {
@@ -713,16 +691,16 @@ $cropsBySeason = getCropsBySeason();
             });
     }
 
-    // 渲染会话分析图表
+    // render session analytics chart
     function renderSessionChart(data) {
         const ctx = document.getElementById('sessionPlaytimeChart').getContext('2d');
         
-        // 销毁现有图表（如果存在）
+        // destroy existing chart (if exists)
         if (window.sessionChart instanceof Chart) {
             window.sessionChart.destroy();
         }
         
-        // 确保数据存在且格式正确
+        // ensure data exists and is correct format
         if (!data || !data.labels || !data.values) {
             console.error('Invalid session data format:', data);
             return;
@@ -775,32 +753,32 @@ $cropsBySeason = getCropsBySeason();
         });
     }
 
-    // 添加导出 PDF 功能
+    // add export PDF function
     async function exportToPDF() {
         try {
-            // 显示加载提示
+            // show loading prompt
             const exportBtn = document.getElementById('export-data');
             const originalText = exportBtn.innerHTML;
             exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Exporting...';
             exportBtn.disabled = true;
 
-            // 创建 PDF 实例 - 使用横向布局
+            // create PDF instance - use horizontal layout
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // 改为横向布局
+            const doc = new jsPDF('l', 'mm', 'a4'); // change to horizontal layout
 
-            // 设置标题
+            // set title
             doc.setFontSize(20);
             doc.text('Stardew Valley Analytics Report', 20, 20);
             doc.setFontSize(12);
             doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 30);
 
-            // 导出关键指标
+            // export key metrics
             const metricsSection = document.getElementById('overview');
             const metricsCanvas = await html2canvas(metricsSection, {
                 scale: 2,
                 backgroundColor: '#ffffff',
-                logging: false, // 禁用日志
-                useCORS: true // 启用跨域
+                logging: false, // disable logging
+                useCORS: true // enable cross-origin resource sharing
             });
             const metricsAspectRatio = metricsCanvas.width / metricsCanvas.height;
             const metricsWidth = 250;
@@ -815,7 +793,7 @@ $cropsBySeason = getCropsBySeason();
                 metricsHeight
             );
 
-            // 导出游戏时间分布图表
+            // export playtime distribution chart
             const playtimeChart = document.getElementById('playtimeChart');
             const playtimeCanvas = await html2canvas(playtimeChart.parentElement, {
                 scale: 2,
@@ -831,27 +809,27 @@ $cropsBySeason = getCropsBySeason();
                 playtimeCanvas.toDataURL('image/png'),
                 'PNG',
                 20,
-                metricsHeight + 50, // 在关键指标下方留出足够空间
+                metricsHeight + 50, // leave enough space below key metrics
                 chartWidth,
                 chartHeight
             );
 
-            // 添加页眉
+            // add header
             doc.setFontSize(10);
             doc.setTextColor(128, 128, 128);
             doc.text('Stardew Valley Player Management System', doc.internal.pageSize.width - 20, 10, { align: 'right' });
 
-            // 添加页脚
+            // add footer
             const pageCount = doc.internal.getNumberOfPages();
             for(let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
                 doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
             }
 
-            // 保存 PDF
+            // save PDF
             doc.save('stardew-valley-analytics.pdf');
 
-            // 恢复按钮状态
+            // restore button state
             exportBtn.innerHTML = originalText;
             exportBtn.disabled = false;
 
@@ -859,7 +837,7 @@ $cropsBySeason = getCropsBySeason();
             console.error('Error generating PDF:', error);
             alert('Failed to generate PDF. Please try again.');
             
-            // 恢复按钮状态
+            // restore button state
             const exportBtn = document.getElementById('export-data');
             exportBtn.innerHTML = '<i class="fas fa-download me-1"></i> Export';
             exportBtn.disabled = false;
