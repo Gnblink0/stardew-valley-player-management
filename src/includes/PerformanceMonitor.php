@@ -7,7 +7,7 @@ class PerformanceMonitor {
     private $queries = [];
     private $timings = [];
     private $isEnabled = false;
-    private $logFile = '/tmp/stardew_valley_performance.log';  // 默认日志文件路径
+    private $logFile = '/tmp/stardew_valley_performance.log';  // default log file path
 
     private function __construct() {
         $this->startTime = microtime(true);
@@ -123,7 +123,7 @@ class PerformanceMonitor {
         if (!$data) return;
 
         if (!$this->logFile) {
-            return;  // 如果没有设置日志文件，直接返回
+            return;  // if no log file is set, return
         }
 
         $logMessage = sprintf(

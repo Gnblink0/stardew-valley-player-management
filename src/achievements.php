@@ -19,10 +19,8 @@ if ($playerId) {
 // Get all players for filter dropdown
 $players = getPlayers();
 
-// 获取所有成就和统计信息
 $achievementStats = getAchievementStats($playerId);
 
-// 获取成就大师（拥有最多成就的玩家）
 $achievementMaster = getAchievementMaster();
 
 include 'components/header.php';
@@ -164,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         Array.from(cards).forEach(card => {
             const statusElement = card.querySelector('.badge');
             
-            // 安全地获取状态文本
+            // safely get the status text
             const cardStatus = statusElement ? statusElement.textContent.trim() : '';
             
             const statusMatch = !status || cardStatus === status;

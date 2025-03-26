@@ -1,11 +1,8 @@
 <?php
-// 包含函数文件
 require_once '../functions.php';
 
-// 设置响应头为JSON
 header('Content-Type: application/json');
 
-// 检查是否提供了玩家ID
 if (!isset($_GET['player_id'])) {
     echo json_encode([
         'status' => 'error',
@@ -14,11 +11,18 @@ if (!isset($_GET['player_id'])) {
     exit;
 }
 
-// 获取玩家ID
-$playerId = (int)$_GET['player_id'];
+if (!isset($_GET['player_id'])) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'No player ID provided'
+    ]);
+    exit;
+}
 
-// 使用functions.php中的getPlayerInventory函数获取玩家库存数据
-$inventoryData = getPlayerInventory($playerId);
+$playerId = (int)$_GET['player_id'];
+$type = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+
+$inventoryData = getPlayerInventory($playerId, $type);
 
 if ($inventoryData !== false) {
     echo json_encode([

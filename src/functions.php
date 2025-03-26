@@ -178,7 +178,7 @@ function getTopPlayers($limit = 5, $criteria = 'total_gold_earned') {
                 LIMIT :limit";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT); // 明确指定为整数类型
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT); // explicitly specify the integer type
         $stmt->execute();
         return $stmt->fetchAll();
     } catch (PDOException $e) {
@@ -295,18 +295,24 @@ function getPlayerStatistics($playerId) {
     }
 }
 
-function getPlayerCrops($playerId) {
+function getPlayerCrops($playerId, $season = 'all') {
     global $pdo;
     
     try {
+        $params = [$playerId];
         $sql = "SELECT c.crop_id, c.name, c.season, 
                        pch.harvested, pch.sold
                 FROM crops c
                 JOIN player_crops_harvested pch ON c.crop_id = pch.crop_id
                 WHERE pch.player_id = ?";
         
+        if ($season !== 'all') {
+            $sql .= " AND c.season = ?";
+            $params[] = $season;
+        }
+        
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$playerId]);
+        $stmt->execute($params);
         
         $crops = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -318,10 +324,11 @@ function getPlayerCrops($playerId) {
 }
 
 // Get player animals data
-function getPlayerAnimals($playerId) {
+function getPlayerAnimals($playerId, $building = 'all') {
     global $pdo;
     
     try {
+        $params = [$playerId];
         $sql = "SELECT a.animal_id, a.name, at.type as type, 
                        CASE 
                            WHEN ba.animal_id IS NOT NULL THEN 'barn' 
@@ -338,8 +345,16 @@ function getPlayerAnimals($playerId) {
                 JOIN player_animals_owned pao ON a.animal_id = pao.animal_id
                 WHERE pao.player_id = ? AND pao.owned = 1";
         
+        if ($building !== 'all') {
+            if ($building === 'barn') {
+                $sql .= " AND ba.animal_id IS NOT NULL";
+            } else if ($building === 'coop') {
+                $sql .= " AND ca.animal_id IS NOT NULL";
+            }
+        }
+        
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$playerId]);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     } catch (PDOException $e) {
         error_log("Error getting player animals: " . $e->getMessage());
@@ -347,18 +362,24 @@ function getPlayerAnimals($playerId) {
     }
 }
 
-function getPlayerInventory($playerId) {
+function getPlayerInventory($playerId, $type = 'all') {
     global $pdo;
     
     try {
+        $params = [$playerId];
         $sql = "SELECT i.item_id, i.name, i.type, i.value,
                        inv.quantity
                 FROM items i
                 JOIN inventory inv ON i.item_id = inv.item_id
                 WHERE inv.player_id = ?";
         
+        if ($type !== 'all') {
+            $sql .= " AND i.type = ?";
+            $params[] = $type;
+        }
+        
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$playerId]);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     } catch (PDOException $e) {
         error_log("Error getting player inventory: " . $e->getMessage());
