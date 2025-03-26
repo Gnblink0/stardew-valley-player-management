@@ -12,10 +12,15 @@ if ($playerId) {
     $achievements = getAchievements();
 }
 
-// 获取所有成就和统计信息
+// Debug: Check if achievements are being returned
+// echo '<pre>'; print_r($achievements); echo '</pre>';
+
+// Get all players for filter dropdown
+$players = getPlayers();
+
+
 $achievementStats = getAchievementStats($playerId);
 
-// 获取成就大师（拥有最多成就的玩家）
 $achievementMaster = getAchievementMaster();
 
 include 'components/header.php';
@@ -138,6 +143,32 @@ include 'components/header.php';
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusFilter = document.getElementById('statusFilter');
+    const achievementsGrid = document.getElementById('achievements-grid');
+
+    function filterAchievements() {
+        const status = statusFilter.value;
+        
+        const cards = achievementsGrid.getElementsByClassName('col-md-6');
+        
+        Array.from(cards).forEach(card => {
+            const statusElement = card.querySelector('.badge');
+            
+            // safely get the status text
+            const cardStatus = statusElement ? statusElement.textContent.trim() : '';
+            
+            const statusMatch = !status || cardStatus === status;
+            
+            card.style.display = statusMatch ? '' : 'none';
+        });
+    }
+
+    statusFilter.addEventListener('change', filterAchievements);
+});
+</script>
 
 <?php include 'components/footer.php'; ?>
 

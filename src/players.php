@@ -48,6 +48,33 @@ if (isset($_GET['success'])) {
 include 'components/header.php';
 ?>
 
+<style>
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group span {
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.btn-group .btn {
+    margin-right: 5px;
+}
+
+.content-group {
+    min-height: 200px;
+}
+
+.friendship-hearts {
+    color: #ff6b6b;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+</style>
+
 <div class="container">
     <?php if (isset($successMessage)): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -292,50 +319,6 @@ include 'components/header.php';
                                 </div>
                             </div>
                             
-                            <!-- Farm Items -->
-                            <div class="col-md-12 mb-3">
-                                <h6>Inventory Items</h6>
-                                <?php
-                                $stmt = $pdo->prepare("
-                                    SELECT i.name, i.type, i.value, inv.quantity, (i.value * inv.quantity) as total_value
-                                    FROM inventory inv
-                                    JOIN items i ON inv.item_id = i.item_id
-                                    WHERE inv.player_id = ?
-                                    ORDER BY total_value DESC
-                                    LIMIT 5
-                                ");
-                                $stmt->execute([$playerId]);
-                                $inventory = $stmt->fetchAll();
-                                
-                                if (count($inventory) > 0):
-                                ?>
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Item</th>
-                                                <th>Type</th>
-                                                <th>Quantity</th>
-                                                <th>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($inventory as $item): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($item['name']); ?></td>
-                                                <td><span class="badge bg-secondary"><?php echo htmlspecialchars($item['type']); ?></span></td>
-                                                <td><?php echo $item['quantity']; ?></td>
-                                                <td><?php echo formatGold($item['total_value']); ?></td>
-                                            </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php else: ?>
-                                <p class="text-muted">No inventory items found.</p>
-                                <?php endif; ?>
-                            </div>
-                            
                             <!-- Recent Sessions -->
                             <div class="col-md-12">
                                 <h6>Recent Sessions</h6>
@@ -423,6 +406,116 @@ include 'components/header.php';
             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deletePlayerModal">
                 <i class="fas fa-trash-alt me-1"></i> Delete Player
             </button>
+        </div>
+        
+        <!-- 在 Statistics card 后面添加 -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Player Assets</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Filter Tabs -->
+                        <div class="tabs mb-3">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-outline-primary active" data-tab="crops">Crops</button>
+                                <button class="btn btn-outline-primary" data-tab="animals">Animals</button>
+                                <button class="btn btn-outline-primary" data-tab="inventory">Inventory</button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div id="filters-area" class="mb-3">
+                            <!-- Crops Filter -->
+                            <div class="filter-group" id="crops-filter">
+                                <span>Season:</span>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="spring">Spring</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="summer">Summer</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="fall">Fall</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-filter="winter">Winter</button>
+                                </div>
+                            </div>
+
+                            <!-- Animals Filter -->
+                            <div class="filter-group" id="animals-filter" style="display:none">
+                                <span>Type:</span>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="barn">Barn</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="coop">Coop</button>
+                                </div>
+                            </div>
+
+                            <!-- Inventory Filter -->
+                            <div class="filter-group" id="inventory-filter" style="display:none">
+                                <span>Type:</span>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="tools">Tools</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="seeds">Seeds</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="vegetable">Vegetable</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="fruit">Fruit</button>
+                                    <button class="btn btn-sm btn-outline-secondary" data-filter="animal-product">Animal Product</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Area -->
+                        <div id="content-area">
+                            <div id="crops-content" class="content-group">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="crops-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Crop Name</th>
+                                                <th>Season</th>
+                                                <th>Harvested</th>
+                                                <th>Sold</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="animals-content" class="content-group" style="display:none">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="animals-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Animal Name</th>
+                                                <th>Type</th>
+                                                <th>Building</th>
+                                                <th>Friendship</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="inventory-content" class="content-group" style="display:none">
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="inventory-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item Name</th>
+                                                <th>Type</th>
+                                                <th>Quantity</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php endif; ?>
         
@@ -571,5 +664,155 @@ include 'components/header.php';
         </script>
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const playerId = <?php echo $playerId; ?>;
+    if (!playerId) return;
+
+    // Tab 切换
+    document.querySelectorAll('[data-tab]').forEach((btn) => {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll('[data-tab]').forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            document.querySelectorAll(".content-group, .filter-group").forEach((el) => el.style.display = "none");
+
+            const tab = btn.dataset.tab;
+            document.getElementById(`${tab}-content`).style.display = "block";
+            document.getElementById(`${tab}-filter`).style.display = "block";
+
+            loadTabData(tab);
+        });
+    });
+
+    // 各类 filter 按钮绑定
+    bindFilterButtons("crops", filterCropsBySeason);
+    bindFilterButtons("animals", filterAnimalsByType);
+    bindFilterButtons("inventory", filterInventoryByType);
+
+    function bindFilterButtons(type, filterFn) {
+        console.log(`Binding filter buttons for ${type}`);
+        document.querySelectorAll(`#${type}-filter button`).forEach((btn) => {
+            btn.addEventListener("click", function() {
+                console.log(`Filter button clicked for ${type}:`, btn.dataset.filter);
+                document.querySelectorAll(`#${type}-filter button`).forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+                filterFn(btn.dataset.filter);
+            });
+        });
+    }
+
+    function loadTabData(tabName) {
+        const activeFilter = document.querySelector(`#${tabName}-filter button.active`);
+        const filterValue = activeFilter ? activeFilter.dataset.filter : "all";
+        console.log(`Loading ${tabName} data with filter:`, filterValue);
+        
+        const url = `/stardew-valley-player-management/src/api/${tabName}.php?player_id=${playerId}&filter=${filterValue}`;
+        console.log('Fetching URL:', url);
+
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(`Received ${tabName} data:`, data);
+                if (data.status === 'success') {
+                    switch (tabName) {
+                        case "crops":
+                            renderCropTable(data.data);
+                            break;
+                        case "animals":
+                            renderAnimalTable(data.data);
+                            break;
+                        case "inventory":
+                            renderInventoryTable(data.data);
+                            break;
+                    }
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error(`Error loading ${tabName} data:`, error);
+                const tbody = document.querySelector(`#${tabName}-table tbody`);
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error loading data: ${error.message}</td></tr>`;
+            });
+    }
+
+    function renderCropTable(crops) {
+        const tbody = document.querySelector("#crops-table tbody");
+        tbody.innerHTML = "";
+        if (crops.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center">No crops found</td></tr>`;
+            return;
+        }
+        crops.forEach((crop) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${crop.name || ''}</td>
+                <td>${crop.season || ''}</td>
+                <td>${crop.harvested || 0}</td>
+                <td>${crop.sold || 0}</td>`;
+            tbody.appendChild(row);
+        });
+    }
+
+    function filterCropsBySeason(season) {
+        loadTabData("crops");
+    }
+
+    function renderAnimalTable(animals) {
+        const tbody = document.querySelector("#animals-table tbody");
+        tbody.innerHTML = "";
+        if (animals.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center">No animals found</td></tr>`;
+            return;
+        }
+        animals.forEach((animal) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${animal.name || ''}</td>
+                <td>${animal.type || ''}</td>
+                <td>${animal.building || ''}</td>
+                <td>${"❤️".repeat(parseInt(animal.friendship_level) || 0)}</td>`;
+            tbody.appendChild(row);
+        });
+    }
+
+    function filterAnimalsByType(type) {
+        loadTabData("animals");
+    }
+
+    function renderInventoryTable(items) {
+        const tbody = document.querySelector("#inventory-table tbody");
+        tbody.innerHTML = "";
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center">No items found</td></tr>`;
+            return;
+        }
+        items.forEach((item) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${item.name || ''}</td>
+                <td>${item.type || ''}</td>
+                <td>${item.quantity || 0}</td>
+                <td>${item.value || 0}g</td>`;
+            tbody.appendChild(row);
+        });
+    }
+
+    function filterInventoryByType(type) {
+        loadTabData("inventory");
+    }
+
+    // 初始默认加载 crops tab
+    document.querySelector('[data-tab="crops"]').click();
+});
+</script>
 
 <?php include 'components/footer.php'; ?>

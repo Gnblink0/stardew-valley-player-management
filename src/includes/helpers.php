@@ -1,43 +1,43 @@
 <?php
 
 /**
- * 将数字格式化为金币显示格式
- * 例如：1234 -> 1,234g
+ * change number to gold format
+ * for example: 1234 -> 1,234g
  *
- * @param int|float $amount 金币数量
- * @return string 格式化后的字符串
+ * @param int|float $amount gold amount
+ * @return string formatted string
  */
 function formatGold($amount) {
     return number_format($amount) . 'g';
 }
 
 /**
- * 格式化日期时间
+ * format datetime
  * 
- * @param string $datetime 日期时间字符串
- * @param string $format 输出格式
- * @return string 格式化后的日期时间
+ * @param string $datetime datetime string
+ * @param string $format output format
+ * @return string formatted datetime
  */
 function formatDateTime($datetime, $format = 'Y-m-d H:i:s') {
     return date($format, strtotime($datetime));
 }
 
 /**
- * 格式化时间间隔
+ * format duration
  * 
- * @param string|int $duration 时间间隔（分钟）或开始时间
- * @param string|null $endTime 结束时间（可选）
- * @return string 格式化后的时间间隔
+ * @param string|int $duration duration (minutes) or start time
+ * @param string|null $endTime end time (optional)
+ * @return string formatted duration
  */
 function formatDuration($duration, $endTime = null) {
     if ($endTime !== null) {
-        // 如果提供了两个时间参数，计算时间差
-        $start = new DateTime($duration); // 这里 $duration 是开始时间
+        // if two time parameters are provided, calculate the duration
+        $start = new DateTime($duration); // $duration is start time
         $end = new DateTime($endTime);
         $interval = $start->diff($end);
         $minutes = $interval->days * 24 * 60 + $interval->h * 60 + $interval->i;
     } else {
-        // 如果只提供了一个参数，假设它是分钟数
+        // if only one parameter is provided, assume it's minutes
         $minutes = intval($duration);
     }
     
@@ -52,23 +52,23 @@ function formatDuration($duration, $endTime = null) {
 }
 
 /**
- * 格式化百分比
+ * format percentage
  * 
- * @param float $value 小数值
- * @param int $decimals 小数位数
- * @return string 格式化后的百分比
+ * @param float $value float value
+ * @param int $decimals decimal places
+ * @return string formatted percentage
  */
 function formatPercentage($value, $decimals = 1) {
     return number_format($value * 100, $decimals) . '%';
 }
 
 /**
- * 截断文本
+ * truncate text
  * 
- * @param string $text 原始文本
- * @param int $length 最大长度
- * @param string $suffix 后缀
- * @return string 截断后的文本
+ * @param string $text original text
+ * @param int $length max length
+ * @param string $suffix suffix
+ * @return string truncated text
  */
 function truncateText($text, $length = 100, $suffix = '...') {
     if (mb_strlen($text) <= $length) {
@@ -78,29 +78,29 @@ function truncateText($text, $length = 100, $suffix = '...') {
 }
 
 /**
- * 生成随机颜色
+ * generate random color
  * 
- * @return string 十六进制颜色代码
+ * @return string hex color code
  */
 function randomColor() {
     return '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
 }
 
 /**
- * 计算经验等级
+ * calculate level
  * 
- * @param int $exp 经验值
- * @return int 等级
+ * @param int $exp experience value
+ * @return int level
  */
 function calculateLevel($exp) {
     return floor(sqrt($exp / 100)) + 1;
 }
 
 /**
- * 获取季节名称
+ * get season name
  * 
- * @param int $month 月份（1-12）
- * @return string 季节名称
+ * @param int $month month (1-12)
+ * @return string season name
  */
 function getSeason($month) {
     $seasons = [
@@ -120,11 +120,11 @@ function getSeason($month) {
 }
 
 /**
- * 计算两个日期之间的天数
+ * calculate the days between two dates
  * 
- * @param string $date1 第一个日期
- * @param string $date2 第二个日期
- * @return int 天数差
+ * @param string $date1 first date
+ * @param string $date2 second date
+ * @return int days difference
  */
 function daysBetween($date1, $date2) {
     $d1 = new DateTime($date1);
@@ -134,10 +134,10 @@ function daysBetween($date1, $date2) {
 }
 
 /**
- * 格式化文件大小
+ * format file size
  * 
- * @param int $bytes 字节数
- * @return string 格式化后的大小
+ * @param int $bytes bytes
+ * @return string formatted size
  */
 function formatFileSize($bytes) {
     $units = ['B', 'KB', 'MB', 'GB', 'TB'];

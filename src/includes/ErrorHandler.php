@@ -4,10 +4,10 @@ class ErrorHandler {
     private static $instance = null;
     private $errors = [];
     private $isDebugMode = false;
-    private $logFile = '/tmp/stardew_valley_error.log';  // 默认日志文件路径
+    private $logFile = '/tmp/stardew_valley_error.log';  // default log file path
 
     private function __construct() {
-        // 设置错误处理函数
+        // set error handling function
         set_error_handler([$this, 'handleError']);
         set_exception_handler([$this, 'handleException']);
         register_shutdown_function([$this, 'handleFatalError']);
@@ -118,7 +118,7 @@ class ErrorHandler {
 
     private function logError($error) {
         if (!$this->logFile) {
-            return;  // 如果没有设置日志文件，直接返回
+            return;  // if no log file is set, return
         }
 
         $logMessage = sprintf(
