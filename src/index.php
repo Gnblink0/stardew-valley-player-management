@@ -30,43 +30,53 @@ $completedAchievements = getTopAchievementPlayers(1)[0] ?? null;
 
     <div class="row mb-4">
         <div class="col-md-4">
-            <div class="card card-player">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Total Players</h5>
-                    <p class="card-text stat-counter"><?php echo $playerCount; ?></p>
-                    <a href="players.php" class="btn btn-primary">View Players</a>
+            <div class="card h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Total Players</h5>
+                        <p class="card-text stat-counter display-4 mb-4"><?php echo $playerCount; ?></p>
+                    </div>
+                    <div>
+                        <a href="players.php" class="btn btn-primary">View Players</a>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="card card-farm">
-                <div class="card-body text-center">
-                    <i class="fas fa-trophy fa-3x mb-3 text-warning"></i>
-                    <h5 class="card-title">Top Farmer</h5>
-                    <?php if ($topPlayer): ?>
-                    <p class="card-text stat-counter"><?php echo formatGold($topPlayer['score']); ?></p>
-                    <p class="stat-label"><?php echo htmlspecialchars($topPlayer['name']); ?> - <?php echo htmlspecialchars($topPlayer['farm_name']); ?></p>
-                    <?php else: ?>
-                    <p class="card-text">No data available</p>
-                    <?php endif; ?>
+            <div class="card h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <i class="fas fa-trophy fa-3x mb-3 text-warning"></i>
+                        <h5 class="card-title">Top Farmer</h5>
+                        <?php if ($topPlayer): ?>
+                        <p class="card-text stat-counter display-4"><?php echo formatGold($topPlayer['score']); ?></p>
+                        <p class="stat-label mb-4"><?php echo htmlspecialchars($topPlayer['name']); ?> - <?php echo htmlspecialchars($topPlayer['farm_name']); ?></p>
+                        <?php else: ?>
+                        <p class="card-text mb-4">No data available</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="card card-achievement">
-                <div class="card-body text-center">
-                    <i class="fas fa-award fa-3x mb-3 text-success"></i>
-                    <h5 class="card-title">Achievement Master</h5>
-                    <?php if ($completedAchievements): ?>
-                    <p class="card-text stat-counter"><?php echo $completedAchievements['completed_achievements']; ?></p>
-                    <p class="stat-label">Completed by <?php echo htmlspecialchars($completedAchievements['player_name']); ?></p>
-                    <?php else: ?>
-                    <p class="card-text">No data available</p>
-                    <?php endif; ?>
-                    <a href="achievements.php" class="btn btn-success">View Achievements</a>
+            <div class="card h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <i class="fas fa-award fa-3x mb-3 text-success"></i>
+                        <h5 class="card-title">Achievement Master</h5>
+                        <?php if ($completedAchievements): ?>
+                        <p class="card-text stat-counter display-4"><?php echo $completedAchievements['completed_achievements']; ?></p>
+                        <p class="stat-label mb-4">Completed by <?php echo htmlspecialchars($completedAchievements['player_name']); ?></p>
+                        <?php else: ?>
+                        <p class="card-text mb-4">No data available</p>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <a href="achievements.php" class="btn btn-success">View Achievements</a>
+                    </div>
                 </div>
             </div>
         </div>

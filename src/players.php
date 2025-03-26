@@ -451,11 +451,11 @@ include 'components/header.php';
                             <table class="table table-striped" id="playersTable">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Farm Name</th>
-                                        <th>Gold Earned</th>
-                                        <th>In-Game Days</th>
+                                        <th class="sortable" data-sort="id">ID <i class="fas fa-sort"></i></th>
+                                        <th class="sortable" data-sort="name">Name <i class="fas fa-sort"></i></th>
+                                        <th class="sortable" data-sort="farm_name">Farm Name <i class="fas fa-sort"></i></th>
+                                        <th class="sortable" data-sort="gold">Gold Earned <i class="fas fa-sort"></i></th>
+                                        <th class="sortable" data-sort="days">In-Game Days <i class="fas fa-sort"></i></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -475,8 +475,12 @@ include 'components/header.php';
                                         <td><?php echo $player['player_id']; ?></td>
                                         <td><?php echo htmlspecialchars($player['name']); ?></td>
                                         <td><?php echo htmlspecialchars($player['farm_name']); ?></td>
-                                        <td><?php echo isset($player['total_gold_earned']) ? formatGold($player['total_gold_earned']) : 'N/A'; ?></td>
-                                        <td><?php echo isset($player['in_game_days']) ? $player['in_game_days'] : 'N/A'; ?></td>
+                                        <td data-value="<?php echo isset($player['total_gold_earned']) ? $player['total_gold_earned'] : 0; ?>">
+                                            <?php echo isset($player['total_gold_earned']) ? formatGold($player['total_gold_earned']) : 'N/A'; ?>
+                                        </td>
+                                        <td data-value="<?php echo isset($player['in_game_days']) ? $player['in_game_days'] : 0; ?>">
+                                            <?php echo isset($player['in_game_days']) ? $player['in_game_days'] : 'N/A'; ?>
+                                        </td>
                                         <td>
                                             <a href="players.php?id=<?php echo $player['player_id']; ?>" class="btn btn-sm btn-primary">
                                                 <i class="fas fa-eye"></i>
@@ -494,6 +498,77 @@ include 'components/header.php';
                 </div>
             </div>
         </div>
+
+        <style>
+            .sortable {
+                cursor: pointer;
+            }
+            .sortable i {
+                margin-left: 5px;
+            }
+            .sortable.asc i:before {
+                content: "\f0de" !important;
+            }
+            .sortable.desc i:before {
+                content: "\f0dd" !important;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const table = document.getElementById('playersTable');
+                const headers = table.querySelectorAll('th.sortable');
+                
+                headers.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const sortBy = header.getAttribute('data-sort');
+                        const tbody = table.querySelector('tbody');
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+                        
+                        // Remove existing sort classes
+                        headers.forEach(h => h.classList.remove('asc', 'desc'));
+                        
+                        // Determine sort direction
+                        const isAsc = !header.classList.contains('asc');
+                        header.classList.toggle('asc', isAsc);
+                        header.classList.toggle('desc', !isAsc);
+                        
+                        // Sort rows
+                        rows.sort((a, b) => {
+                            let aValue, bValue;
+                            
+                            switch(sortBy) {
+                                case 'id':
+                                    aValue = parseInt(a.cells[0].textContent);
+                                    bValue = parseInt(b.cells[0].textContent);
+                                    break;
+                                case 'name':
+                                case 'farm_name':
+                                    const columnIndex = sortBy === 'name' ? 1 : 2;
+                                    aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
+                                    bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
+                                    break;
+                                case 'gold':
+                                    aValue = parseInt(a.cells[3].getAttribute('data-value')) || 0;
+                                    bValue = parseInt(b.cells[3].getAttribute('data-value')) || 0;
+                                    break;
+                                case 'days':
+                                    aValue = parseInt(a.cells[4].getAttribute('data-value')) || 0;
+                                    bValue = parseInt(b.cells[4].getAttribute('data-value')) || 0;
+                                    break;
+                            }
+                            
+                            if (aValue < bValue) return isAsc ? -1 : 1;
+                            if (aValue > bValue) return isAsc ? 1 : -1;
+                            return 0;
+                        });
+                        
+                        // Reorder rows in the table
+                        rows.forEach(row => tbody.appendChild(row));
+                    });
+                });
+            });
+        </script>
     <?php endif; ?>
 </div>
 
