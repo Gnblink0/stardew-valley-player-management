@@ -4,7 +4,6 @@ require_once 'includes/functions.php';
 
 // Check for filter parameters
 $playerId = isset($_GET['player_id']) ? (int)$_GET['player_id'] : null;
-$status = isset($_GET['status']) ? $_GET['status'] : null;
 
 // Get achievements based on filters
 if ($playerId) {
@@ -12,12 +11,6 @@ if ($playerId) {
 } else {
     $achievements = getAchievements();
 }
-
-// Debug: Check if achievements are being returned
-// echo '<pre>'; print_r($achievements); echo '</pre>';
-
-// Get all players for filter dropdown
-$players = getPlayers();
 
 // 获取所有成就和统计信息
 $achievementStats = getAchievementStats($playerId);
@@ -31,18 +24,10 @@ include 'components/header.php';
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Achievements</h1>
-        <div>
-            <select class="form-select" id="statusFilter">
-                <option value="">All Status</option>
-                <option value="Completed">Completed</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Not Started">Not Started</option>
-            </select>
-        </div>
     </div>
 
     <!-- Achievement Master Card -->
-    <div class="card mb-4">
+    <!-- <div class="card mb-4">
         <div class="card-body text-center">
             <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
             <h2 class="card-title">Achievement Master</h2>
@@ -50,11 +35,9 @@ include 'components/header.php';
             <p class="lead"><?php echo htmlspecialchars($achievementMaster['name']); ?> - <?php echo htmlspecialchars($achievementMaster['farm_name']); ?></p>
             <p class="text-muted"><?php echo $achievementMaster['achievement_count']; ?> Achievements Completed</p>
             <?php else: ?>
-            <p class="text-muted">No data available</p>
             <?php endif; ?>
-            <button class="btn btn-success" onclick="location.reload()">View Achievements</button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Achievement Progress -->
     <div class="row mb-4">
@@ -124,13 +107,18 @@ include 'components/header.php';
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title mb-0"><?php echo htmlspecialchars($achievement['name']); ?></h5>
-                                <span class="badge bg-<?php echo getStatusBadgeClass($achievement['status']); ?>">
-                                    <?php echo $achievement['status']; ?>
-                                </span>
+                                
+                                <?php if ($achievement['status'] !== 'Not Started'): ?>
+                                    <span class="badge bg-<?php echo getStatusBadgeClass($achievement['status']); ?>">
+                                        <?php echo htmlspecialchars($achievement['status']); ?>
+                                    </span>
+                                <?php endif; ?>
                             </div>
+                            
                             <p class="card-text text-muted mb-3">
                                 <?php echo isset($achievement['goal']) ? htmlspecialchars($achievement['goal']) : 'No goal available'; ?>
                             </p>
+
                             <?php if (isset($achievement['progress']) && $achievement['progress'] !== null): ?>
                             <div class="mt-3">
                                 <div class="progress" style="height: 5px;">
@@ -151,30 +139,5 @@ include 'components/header.php';
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const statusFilter = document.getElementById('statusFilter');
-    const achievementsGrid = document.getElementById('achievements-grid');
-
-    function filterAchievements() {
-        const status = statusFilter.value;
-        
-        const cards = achievementsGrid.getElementsByClassName('col-md-6');
-        
-        Array.from(cards).forEach(card => {
-            const statusElement = card.querySelector('.badge');
-            
-            // 安全地获取状态文本
-            const cardStatus = statusElement ? statusElement.textContent.trim() : '';
-            
-            const statusMatch = !status || cardStatus === status;
-            
-            card.style.display = statusMatch ? '' : 'none';
-        });
-    }
-
-    statusFilter.addEventListener('change', filterAchievements);
-});
-</script>
-
 <?php include 'components/footer.php'; ?>
+
