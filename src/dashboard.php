@@ -87,6 +87,12 @@ $cropsBySeason = getCropsBySeason();
     }
 </style>
 
+<head>
+    <!-- ... 其他 head 内容 ... -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
 <div class="row">
     <!-- Sidebar -->
     <?php include 'components/sidebar.php'; ?>
@@ -135,12 +141,9 @@ $cropsBySeason = getCropsBySeason();
                             <div class="flex-grow-1">
                                 <div class="text-secondary mb-1">Total Players</div>
                                 <div class="metric-value"><?php echo count(getPlayers()); ?></div>
-                                <div class="text-success">
-                                    <i class="fas fa-users"></i>
-                                </div>
                             </div>
-                            <div class="ms-3 text-primary">
-                                <i class="fas fa-user-friends fa-3x"></i>
+                            <div class="ms-3">
+                                <i class="fas fa-users fa-2x text-primary"></i>
                             </div>
                         </div>
                     </div>
@@ -157,12 +160,9 @@ $cropsBySeason = getCropsBySeason();
                                 $totalGold = $stmt->fetch()['total'];
                                 ?>
                                 <div class="metric-value"><?php echo formatGold($totalGold); ?></div>
-                                <div class="text-warning">
-                                    <i class="fas fa-coins"></i>
-                                </div>
                             </div>
-                            <div class="ms-3 text-warning">
-                                <i class="fas fa-coins fa-3x"></i>
+                            <div class="ms-3">
+                                <i class="fas fa-coins fa-2x text-warning"></i>
                             </div>
                         </div>
                     </div>
@@ -180,12 +180,9 @@ $cropsBySeason = getCropsBySeason();
                                 $totalHours = round($totalMinutes / 60, 1);
                                 ?>
                                 <div class="metric-value"><?php echo $totalHours; ?> hrs</div>
-                                <div class="text-info">
-                                    <i class="fas fa-clock"></i>
-                                </div>
                             </div>
-                            <div class="ms-3 text-info">
-                                <i class="fas fa-clock fa-3x"></i>
+                            <div class="ms-3">
+                                <i class="far fa-clock fa-2x text-info"></i>
                             </div>
                         </div>
                     </div>
@@ -202,12 +199,9 @@ $cropsBySeason = getCropsBySeason();
                                 $completedCount = $stmt->fetch()['count'];
                                 ?>
                                 <div class="metric-value"><?php echo $completedCount; ?></div>
-                                <div class="text-success">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
                             </div>
-                            <div class="ms-3 text-success">
-                                <i class="fas fa-trophy fa-3x"></i>
+                            <div class="ms-3">
+                                <i class="fas fa-trophy fa-2x text-success"></i>
                             </div>
                         </div>
                     </div>
@@ -247,6 +241,19 @@ $cropsBySeason = getCropsBySeason();
                     </div>
                 </div>
             </div>
+                            <!-- Playtime Distribution -->
+            <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Playtime Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="sessionPlaytimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </section>
         
         <!-- Achievements section -->
@@ -409,7 +416,9 @@ $cropsBySeason = getCropsBySeason();
     document.addEventListener('DOMContentLoaded', function() {
         // 获取并显示排名数据（默认按金币排名）
         fetchTopPlayers('total_gold_earned');
-        
+        fetchPlaytimeDistribution();
+        fetchSessionAnalytics();
+
         // 为排名标签添加点击事件
         const rankingButtons = document.querySelectorAll('.card-header .btn-group button');
         rankingButtons.forEach(button => {
@@ -423,6 +432,80 @@ $cropsBySeason = getCropsBySeason();
                 // 获取并显示排名数据
                 fetchTopPlayers(criteria);
             });
+        });
+
+        // 添加导出按钮事件监听
+        document.getElementById('export-data').addEventListener('click', exportToPDF);
+        
+        // 添加刷新按钮事件监听
+        document.getElementById('refresh-data').addEventListener('click', async function() {
+            const refreshBtn = this;
+            const originalText = refreshBtn.innerHTML;
+            
+            // 显示加载状态
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
+            refreshBtn.disabled = true;
+            
+            try {
+                // 获取当前选中的排名标准
+                const activeRankingButton = document.querySelector('.card-header .btn-group button.active');
+                const criteria = activeRankingButton ? activeRankingButton.getAttribute('data-criteria') : 'total_gold_earned';
+                
+                // 依次刷新所有数据，使用 await 以便于错误处理
+                console.log('Fetching top players...');
+                const topPlayersResponse = await fetch(`api/top_players.php?criteria=${criteria}`);
+                if (!topPlayersResponse.ok) throw new Error(`Failed to fetch top players: ${topPlayersResponse.status}`);
+                const topPlayersData = await topPlayersResponse.json();
+                if (topPlayersData.status === 'success') {
+                    renderTopPlayers(topPlayersData.data, criteria);
+                } else {
+                    throw new Error(topPlayersData.message || 'Failed to load top players');
+                }
+                
+                console.log('Fetching playtime distribution...');
+                const playtimeResponse = await fetch('api/playtime_distribution.php');
+                if (!playtimeResponse.ok) throw new Error(`Failed to fetch playtime distribution: ${playtimeResponse.status}`);
+                const playtimeData = await playtimeResponse.json();
+                if (playtimeData.status === 'success') {
+                    renderPlaytimeChart(playtimeData.data);
+                } else {
+                    throw new Error(playtimeData.message || 'Failed to load playtime distribution');
+                }
+                
+                console.log('Fetching session analytics...');
+                const sessionResponse = await fetch('api/session_analytics.php');
+                if (!sessionResponse.ok) throw new Error(`Failed to fetch session analytics: ${sessionResponse.status}`);
+                const sessionData = await sessionResponse.json();
+                if (sessionData.status === 'success') {
+                    renderSessionChart(sessionData.data);
+                } else {
+                    throw new Error(sessionData.message || 'Failed to load session analytics');
+                }
+                
+                // 显示成功提示
+                const toastDiv = document.createElement('div');
+                toastDiv.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+                toastDiv.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-check-circle me-2"></i>Data refreshed successfully!
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                `;
+                document.body.appendChild(toastDiv);
+                const toast = new bootstrap.Toast(toastDiv);
+                toast.show();
+                setTimeout(() => toastDiv.remove(), 3000);
+                
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                alert(`Failed to refresh data: ${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+            }
         });
     });
     
@@ -438,13 +521,18 @@ $cropsBySeason = getCropsBySeason();
             </div>
         `;
         
-        fetch(`api/top_players.php?limit=5&criteria=${criteria}`)
-            .then(response => response.json())
+        fetch(`api/top_players.php?criteria=${criteria}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success') {
                     renderTopPlayers(data.data, criteria);
                 } else {
-                    topPlayersList.innerHTML = `<p class="text-danger">Error: ${data.message}</p>`;
+                    throw new Error(data.message || 'Failed to load top players');
                 }
             })
             .catch(error => {
@@ -452,6 +540,7 @@ $cropsBySeason = getCropsBySeason();
                 topPlayersList.innerHTML = '<p class="text-danger">Error loading top players. Please try again later.</p>';
             });
     }
+
     
     // 渲染排名数据
     function renderTopPlayers(players, criteria) {
@@ -502,5 +591,278 @@ $cropsBySeason = getCropsBySeason();
     // 格式化金币数字（添加千位分隔符和 g 后缀）
     function formatGold(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + 'g';
+    }
+
+    // 获取和渲染游戏时间分布数据
+    function fetchPlaytimeDistribution() {
+        fetch('api/playtime_distribution.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    renderPlaytimeChart(data.data);
+                } else {
+                    throw new Error(data.message || 'Failed to load playtime distribution');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching playtime distribution:', error);
+                const canvas = document.getElementById('playtimeChart');
+                const ctx = canvas.getContext('2d');
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#dc3545';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading playtime distribution. Please try again later.',
+                    canvas.width/2,
+                    canvas.height/2);
+            });
+    }
+
+    // 渲染游戏时间分布图表
+    function renderPlaytimeChart(data) {
+        const ctx = document.getElementById('playtimeChart').getContext('2d');
+        
+        // 销毁现有图表（如果存在）
+        if (window.playtimeChart instanceof Chart) {
+            window.playtimeChart.destroy();
+        }
+        
+        // 确保数据存在且格式正确
+        if (!data || !data.labels || !data.values) {
+            console.error('Invalid playtime data format:', data);
+            return;
+        }
+        
+        window.playtimeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Number of Players',
+                    data: data.values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Players'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Playtime Range'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Playtime Distribution'
+                    }
+                }
+            }
+        });
+    }
+
+    // 获取会话分析数据
+    function fetchSessionAnalytics() {
+        fetch('api/session_analytics.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    renderSessionChart(data.data);
+                } else {
+                    throw new Error(data.message || 'Failed to load session analytics');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching session analytics:', error);
+                const canvas = document.getElementById('sessionPlaytimeChart');
+                const ctx = canvas.getContext('2d');
+                ctx.font = 'Arial';
+                ctx.fillStyle = '#dc3545';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading session analytics. Please try again later.',
+                    canvas.width/2,
+                    canvas.height/2);
+            });
+    }
+
+    // 渲染会话分析图表
+    function renderSessionChart(data) {
+        const ctx = document.getElementById('sessionPlaytimeChart').getContext('2d');
+        
+        // 销毁现有图表（如果存在）
+        if (window.sessionChart instanceof Chart) {
+            window.sessionChart.destroy();
+        }
+        
+        // 确保数据存在且格式正确
+        if (!data || !data.labels || !data.values) {
+            console.error('Invalid session data format:', data);
+            return;
+        }
+        
+        window.sessionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Session Duration Distribution',
+                    data: data.values,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Sessions'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Duration Range'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Session Duration Distribution'
+                    }
+                }
+            }
+        });
+    }
+
+    // 添加导出 PDF 功能
+    async function exportToPDF() {
+        try {
+            // 显示加载提示
+            const exportBtn = document.getElementById('export-data');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Exporting...';
+            exportBtn.disabled = true;
+
+            // 创建 PDF 实例 - 使用横向布局
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // 改为横向布局
+
+            // 设置标题
+            doc.setFontSize(20);
+            doc.text('Stardew Valley Analytics Report', 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 30);
+
+            // 导出关键指标
+            const metricsSection = document.getElementById('overview');
+            const metricsCanvas = await html2canvas(metricsSection, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false, // 禁用日志
+                useCORS: true // 启用跨域
+            });
+            const metricsAspectRatio = metricsCanvas.width / metricsCanvas.height;
+            const metricsWidth = 250;
+            const metricsHeight = metricsWidth / metricsAspectRatio;
+            
+            doc.addImage(
+                metricsCanvas.toDataURL('image/png'),
+                'PNG',
+                20,
+                40,
+                metricsWidth,
+                metricsHeight
+            );
+
+            // 导出游戏时间分布图表
+            const playtimeChart = document.getElementById('playtimeChart');
+            const playtimeCanvas = await html2canvas(playtimeChart.parentElement, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true
+            });
+            const chartAspectRatio = playtimeCanvas.width / playtimeCanvas.height;
+            const chartWidth = 250;
+            const chartHeight = chartWidth / chartAspectRatio;
+
+            doc.addImage(
+                playtimeCanvas.toDataURL('image/png'),
+                'PNG',
+                20,
+                metricsHeight + 50, // 在关键指标下方留出足够空间
+                chartWidth,
+                chartHeight
+            );
+
+            // 添加页眉
+            doc.setFontSize(10);
+            doc.setTextColor(128, 128, 128);
+            doc.text('Stardew Valley Player Management System', doc.internal.pageSize.width - 20, 10, { align: 'right' });
+
+            // 添加页脚
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10, { align: 'right' });
+            }
+
+            // 保存 PDF
+            doc.save('stardew-valley-analytics.pdf');
+
+            // 恢复按钮状态
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Failed to generate PDF. Please try again.');
+            
+            // 恢复按钮状态
+            const exportBtn = document.getElementById('export-data');
+            exportBtn.innerHTML = '<i class="fas fa-download me-1"></i> Export';
+            exportBtn.disabled = false;
+        }
     }
 </script>

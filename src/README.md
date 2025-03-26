@@ -1,196 +1,154 @@
-This document provides the guide of how to use `src/functions.php` which are PHP functions available for accessing and manipulating player data in the Stardew Valley Game Analytics system.
+# Stardew Valley Player Management System
 
+A web application for managing and analyzing Stardew Valley player data. The system provides player statistics, gameplay time analysis, and data visualization features.
 
-## Setup
+## Features
 
-### Connection Check
+### Dashboard
+- Key metrics display (total players, top farmer, gameplay time, etc.)
+- Playtime distribution chart
+- Session duration analysis
+- Data export functionality (PDF format)
 
-After finish the connection with web and database, go to http://localhost/stardew-valley-player-management/src/test_functions.php
+### Player Management
+- Player list display
+- Sorting by ID, name, gold earned, and in-game days
+- View and edit player details
 
-If you can see all test results, it means you can use these functions.
+## Tech Stack
 
+- PHP 7.4+
+- MySQL 5.7+
+- Bootstrap 5
+- Chart.js (Data visualization)
+- Font Awesome (Icons)
 
-###
+## Installation
 
-Make sure to include the function file in any script where these functions are used:
+1. Requirements
+   - XAMPP/WAMP/MAMP or other server environment supporting PHP and MySQL
+   - PHP 7.4 or higher
+   - MySQL 5.7 or higher
 
-```php
-require_once 'functions.php';    // Functions defined in this file
+2. Database Setup
+   ```sql
+   -- Create database
+   CREATE DATABASE stardew_valley_management;
+   
+   -- Import database structure
+   mysql -u your_username -p stardew_valley_management < sql/create_tables.sql
+   
+   -- Import sample data (optional)
+   mysql -u your_username -p stardew_valley_management < sql/sample_data.sql
+   ```
+
+3. Configuration
+   - Copy and paste this code into a new file named `config.php` in the `includes` directory:
+   ```php
+   <?php
+   // Database configuration
+   define('DB_HOST', 'localhost');
+   define('DB_USER', 'root');     // Default XAMPP username
+   define('DB_PASS', '');      //Enter your XAMPP password 
+   define('DB_NAME', 'stardew_valley');
+
+   // Establish database connection
+   try {
+       $pdo = new PDO(
+           "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME,
+           DB_USER,
+           DB_PASS,
+           array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
+       );
+   } catch (PDOException $e) {
+       die("Connection failed: " . $e->getMessage());
+   }
+   ?>
+   ```
+
+## Directory Structure
 
 ```
-
-
-## Player Functions
-
-
-### getPlayers($playerId = null)
-
-Retrieves player information from the database.
-
-**Parameters:**
-- `$playerId` (optional): If provided, returns data for a specific player. If omitted, returns all players.
-
-**Returns:**
-- When `$playerId` is provided: An associative array with player data
-- When `$playerId` is omitted: An array of all players
-- `false` on error
-
-**Example:**
-```php
-// Get all players
-$allPlayers = getPlayers();
-
-// Get a specific player
-$player = getPlayers(1);
+src/
+├── api/                    # API endpoints
+│   ├── playtime_distribution.php
+│   ├── session_analytics.php
+│   └── top_players.php
+├── includes/              # Core functionality files
+│   ├── config.php
+│   └── functions.php
+├── js/                    # JavaScript files
+│   ├── dashboard.js
+│   └── players.js
+├── components/           # Page components
+├── dashboard.php         # Dashboard page
+├── players.php          # Player management page
+└── index.php            # Home page
 ```
 
-### updatePlayer($playerId, $data)
+## Usage Guide
 
-Updates player information.
+1. Accessing the System
+   - Open your browser and visit: `http://localhost/stardew-valley-player-management/src/`
+   - Dashboard page is displayed by default
 
-**Parameters:**
-- `$playerId`: The ID of the player to update
-- `$data`: An associative array containing the fields to update:
-  - `name` (optional): Player's name
-  - `avatar` (optional): Player's avatar
-  - `farm_name` (optional): Player's farm name
+2. Dashboard Features
+   - View key statistics
+   - Analyze playtime distribution through charts
+   - Click "Export" to generate PDF report
+   - Click "Refresh" to update data
 
-**Returns:**
-- `true` if update was successful
-- `false` on error or if no fields were updated
+3. Player Management
+   - View all players in the player list
+   - Click column headers to sort
+   - Click on player rows to view/edit details
 
-**Example:**
-```php
-$result = updatePlayer(1, [
-    'name' => 'FarmerJohn',
-    'farm_name' => 'Sunshine Farm'
-]);
+## API Endpoints
+
+### Get Playtime Distribution
+```
+GET /api/playtime_distribution.php
+Returns: Player playtime distribution data
 ```
 
-### deletePlayer($playerId)
-
-Deletes a player and all related records (cascading delete).
-
-**Parameters:**
-- `$playerId`: The ID of the player to delete
-
-**Returns:**
-- `true` if deletion was successful
-- `false` on error
-
-**Example:**
-```php
-$result = deletePlayer(1);
+### Get Session Analytics
+```
+GET /api/session_analytics.php
+Returns: Player session duration distribution
 ```
 
-## Session Functions
-
-### getPlayerSessions($playerId)
-
-Retrieves all game sessions for a specific player.
-
-**Parameters:**
-- `$playerId`: The ID of the player
-
-**Returns:**
-- An array of game sessions
-- `false` on error
-
-**Example:**
-```php
-$sessions = getPlayerSessions(1);
+### Get Top Players
+```
+GET /api/top_players.php?criteria=total_gold_earned
+Parameters:
+- criteria: Ranking criteria (total_gold_earned or in_game_days)
+Returns: List of players sorted by specified criteria
 ```
 
-## Achievement Functions
+## Database Structure
 
-### getAchievements()
+Main Tables:
+- `players`: Basic player information
+- `game_sessions`: Game session records
+- `player_statistics`: Player statistics data
 
-Retrieves all achievements from the database.
+## Development Guide
 
-**Returns:**
-- An array of all achievements
-- `false` on error
+1. Adding New Features
+   - Add new functions in `includes/functions.php`
+   - Add new API endpoints in the `api/` directory
+   - Implement frontend functionality in respective page files
 
-**Example:**
-```php
-$achievements = getAchievements();
-```
+2. Style Modifications
+   - System uses Bootstrap 5 framework
+   - Add custom styles in CSS files
 
-### getPlayerAchievements($playerId)
+## Important Notes
 
-Retrieves all achievements for a specific player.
+- Ensure PDO extension is enabled in PHP configuration
+- Regular database backups are recommended
+- Periodic cleanup of expired session data is advised
 
-**Parameters:**
-- `$playerId`: The ID of the player
+## Support
 
-**Returns:**
-- An array of player achievements with details
-- `false` on error
-
-**Example:**
-```php
-$playerAchievements = getPlayerAchievements(1);
-```
-
-### getTotalAchievementsPerSession()
-
-Retrieves the count of achievements earned in each game session.
-
-**Returns:**
-- An array with session details and achievement counts
-- `false` on error
-
-**Example:**
-```php
-$achievementsPerSession = getTotalAchievementsPerSession();
-```
-
-## Statistics Functions
-
-### getAveragePlaytimePerPlayer()
-
-Calculates the average playtime for each player.
-
-**Returns:**
-- An array with player details and average playtime in minutes
-- `false` on error
-
-**Example:**
-```php
-$avgPlaytime = getAveragePlaytimePerPlayer();
-```
-
-### getWeeklyPlaytimePerPlayer()
-
-Retrieves weekly playtime statistics for all players.
-
-**Returns:**
-- An array organized by player, containing weekly playtime data
-- `false` on error
-
-**Example:**
-```php
-$weeklyPlaytime = getWeeklyPlaytimePerPlayer();
-```
-
-### getTopPlayers($limit = 5, $criteria = 'total_gold_earned')
-
-Retrieves top players based on specified criteria.
-
-**Parameters:**
-- `$limit` (optional): Number of players to return (default: 5)
-- `$criteria` (optional): Sorting criteria (default: 'total_gold_earned')
-  - Valid options: 'total_gold_earned', 'in_game_days'
-
-**Returns:**
-- An array of top players based on the criteria
-- `false` on error
-
-**Example:**
-```php
-// Get top 10 players by gold earned
-$topGoldEarners = getTopPlayers(10, 'total_gold_earned');
-
-// Get top 5 players by in-game days played
-$topDaysPlayed = getTopPlayers(5, 'in_game_days');
-```
+For issues or suggestions, please submit an Issue or contact the system administrator.
