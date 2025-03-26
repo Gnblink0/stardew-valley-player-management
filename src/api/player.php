@@ -3,7 +3,7 @@ require_once '../functions.php';
 
 header('Content-Type: application/json');
 
-// 检查是否提供了玩家ID
+// check if player ID is provided
 if (!isset($_GET['id'])) {
     echo json_encode([
         'status' => 'error',
@@ -14,34 +14,34 @@ if (!isset($_GET['id'])) {
 
 $playerId = (int)$_GET['id'];
 
-// 获取玩家基本信息
+// get player basic information
 $playerData = getPlayers($playerId);
 
 if ($playerData) {
-    // 获取玩家统计数据
+    // get player statistics
     $playerStats = getPlayerStatistics($playerId);
     
     if ($playerStats) {
         $playerData = array_merge($playerData, $playerStats);
     }
     
-    // 获取玩家成就数据 - 修改这部分以匹配数据库结构
+    // get player achievements data - modify this part to match database structure
     $playerAchievements = getPlayerAchievements($playerId);
     if ($playerAchievements) {
-        // 计算成就总数
+        // calculate achievements count
         $achievementsCount = count($playerAchievements);
         $playerData['achievements_count'] = $achievementsCount;
         
-        // 添加成就详细信息到响应中
+        // add achievements details to response
         $playerData['achievements'] = [];
         foreach ($playerAchievements as $achievement) {
-            // 只使用数据库中实际存在的字段
+            // only use fields that exist in the database
             $achievementData = [
                 'achievement_id' => $achievement['achievement_id'],
                 'name' => $achievement['name'],
                 'goal' => $achievement['goal'],
                 'status' => $achievement['status'],
-                // 基于status字段确定是否完成
+                // determine if achievement is completed based on status
                 'completed' => ($achievement['status'] === 'completed')
             ];
             
@@ -52,7 +52,7 @@ if ($playerData) {
         $playerData['achievements'] = [];
     }
     
-    // 获取玩家平均游戏时间
+    // get player average playtime
     try {
         global $pdo;
         $sql = "SELECT AVG(TIMESTAMPDIFF(MINUTE, gs.start_time, gs.end_time)) as avg_playtime
@@ -73,7 +73,7 @@ if ($playerData) {
         $playerData['average_playtime'] = 0;
     }
     
-    // 获取玩家最近的游戏会话
+    // get player recent game sessions
     try {
         $sql = "SELECT 
                     gs.session_id,
@@ -94,7 +94,7 @@ if ($playerData) {
         $gameSessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         if ($gameSessions) {
-            // 格式化会话数据
+            // format session data
             $formattedSessions = [];
             foreach ($gameSessions as $session) {
                 $formattedSessions[] = [
@@ -113,7 +113,7 @@ if ($playerData) {
         $playerData['gameSessions'] = [];
     }
     
-    // 获取每周游戏时间数据
+    // get weekly game time data
     try {
         $sql = "SELECT 
                     WEEK(start_time) as week_number,
@@ -134,19 +134,19 @@ if ($playerData) {
         $weeklyData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         if ($weeklyData) {
-            // 将数据组织成按周分组的格式
+            // organize data into weekly grouped format
             $weeklyPlaytime = [];
             foreach ($weeklyData as $day) {
                 $weekNumber = $day['week_number'];
                 $dayOfWeek = $day['day_of_week'];
                 $minutes = $day['total_minutes'];
                 
-                // 确保每周的数据是一个数组
+                // ensure weekly data is an array
                 if (!isset($weeklyPlaytime[$weekNumber])) {
                     $weeklyPlaytime[$weekNumber] = [];
                 }
                 
-                // 将星期几转换为更友好的格式（Mon, Tue等）
+                // convert day of week to more friendly format (Mon, Tue, etc.)
                 $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                 $dayName = $dayNames[$dayOfWeek - 1];
                 

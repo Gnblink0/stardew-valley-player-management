@@ -3,7 +3,7 @@ require_once '../functions.php';
 
 header('Content-Type: application/json');
 
-// 检查请求方法
+// check request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
         'status' => 'error',
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// 检查必需参数
+// check required parameters
 if (!isset($_POST['id']) || !isset($_POST['name'])) {
     echo json_encode([
         'status' => 'error',
@@ -25,7 +25,7 @@ $playerId = (int)$_POST['id'];
 $playerName = trim($_POST['name']);
 $farmName = isset($_POST['farm_name']) ? trim($_POST['farm_name']) : '';
 
-// 验证数据
+// validate data
 if (empty($playerName)) {
     echo json_encode([
         'status' => 'error',
@@ -34,7 +34,7 @@ if (empty($playerName)) {
     exit;
 }
 
-// 更新玩家信息
+// update player information
 try {
     global $pdo;
     

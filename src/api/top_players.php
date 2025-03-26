@@ -3,16 +3,16 @@ require_once '../includes/functions.php';
 
 header('Content-Type: application/json');
 
-// 获取查询参数
+// get query parameters
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
 $criteria = isset($_GET['criteria']) ? $_GET['criteria'] : 'total_gold_earned';
 
-// 验证并限制参数
+// validate and limit parameters
 if ($limit <= 0 || $limit > 20) {
-    $limit = 5; // 默认值
+    $limit = 5; // default value
 }
 
-// 获取排名数据
+// get ranking data
 $topPlayers = getTopPlayers($limit, $criteria);
 
 if ($topPlayers !== false) {

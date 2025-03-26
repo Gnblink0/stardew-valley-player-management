@@ -3,17 +3,16 @@ require_once '../includes/config.php';
 require_once '../includes/functions.php';
 
 try {
-    // 定义更细致的游戏时间区间（小时）
     $ranges = [
-        [0, 1, '< 1h'],        // 新手玩家
-        [1, 3, '1-3h'],        // 初次体验
-        [3, 6, '3-6h'],        // 短期游戏
-        [6, 12, '6-12h'],      // 中等时长
-        [12, 24, '12-24h'],    // 较长游戏
-        [24, 48, '1-2 days'],  // 深度玩家
-        [48, 72, '2-3 days'],  // 资深玩家
-        [72, 120, '3-5 days'], // 专家玩家
-        [120, null, '5+ days'] // 超级玩家
+        [0, 1, '< 1h'],       
+        [1, 3, '1-3h'],       
+        [3, 6, '3-6h'],       
+        [6, 12, '6-12h'],     
+        [12, 24, '12-24h'],   
+        [24, 48, '1-2 days'], 
+        [48, 72, '2-3 days'], 
+        [72, 120, '3-5 days'],
+        [120, null, '5+ days']
     ];
 
     $data = [
@@ -21,12 +20,12 @@ try {
         'values' => []
     ];
 
-    // 为每个区间构建查询条件
+    // build query conditions for each range
     foreach ($ranges as $range) {
-        $start = $range[0] * 60; // 转换为分钟
+        $start = $range[0] * 60; // convert to minutes
         
         if ($range[1] === null) {
-            // 处理最后一个区间
+            // handle last range
             $sql = "
                 SELECT COUNT(DISTINCT p.player_id) as count
                 FROM players p
@@ -37,7 +36,7 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$start]);
         } else {
-            $end = $range[1] * 60; // 转换为分钟
+            $end = $range[1] * 60; // convert to minutes
             $sql = "
                 SELECT COUNT(DISTINCT p.player_id) as count
                 FROM players p
@@ -56,7 +55,7 @@ try {
         $data['values'][] = (int)$count;
     }
 
-    // 发送响应
+    // send response
     header('Content-Type: application/json');
     echo json_encode([
         'status' => 'success',

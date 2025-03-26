@@ -3,7 +3,7 @@ require_once '../includes/config.php';
 require_once '../includes/functions.php';
 
 try {
-    // 定义会话时长区间（小时）
+    // define session duration ranges (hours)
     $ranges = [
         [0, 0.5, '< 30min'],
         [0.5, 1, '30min-1h'],
@@ -20,12 +20,12 @@ try {
         'values' => []
     ];
 
-    // 为每个区间构建查询条件
+    // build query conditions for each range
     foreach ($ranges as $range) {
-        $start = $range[0] * 60; // 转换为分钟
+        $start = $range[0] * 60; // convert to minutes
         
         if ($range[1] === null) {
-            // 处理最后一个区间
+            // handle last range
             $sql = "
                 SELECT COUNT(*) as count
                 FROM game_sessions
@@ -34,7 +34,7 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$start]);
         } else {
-            $end = $range[1] * 60; // 转换为分钟
+            $end = $range[1] * 60; // convert to minutes
             $sql = "
                 SELECT COUNT(*) as count
                 FROM game_sessions
@@ -51,7 +51,7 @@ try {
         $data['values'][] = (int)$count;
     }
 
-    // 发送响应
+    // send response
     header('Content-Type: application/json');
     echo json_encode([
         'status' => 'success',

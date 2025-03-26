@@ -408,7 +408,6 @@ include 'components/header.php';
             </button>
         </div>
         
-        <!-- 在 Statistics card 后面添加 -->
         <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card">
@@ -669,7 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const playerId = <?php echo $playerId; ?>;
     if (!playerId) return;
 
-    // Tab 切换
+    // Tab switch
     document.querySelectorAll('[data-tab]').forEach((btn) => {
         btn.addEventListener("click", function () {
             document.querySelectorAll('[data-tab]').forEach((b) => b.classList.remove("active"));
@@ -685,7 +684,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // 各类 filter 按钮绑定
+    // bind filter buttons for each type
     bindFilterButtons("crops", filterCropsBySeason);
     bindFilterButtons("animals", filterAnimalsByType);
     bindFilterButtons("inventory", filterInventoryByType);
@@ -809,7 +808,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadTabData("inventory");
     }
 
-    // 初始默认加载 crops tab
+    // initial default load crops tab
     document.querySelector('[data-tab="crops"]').click();
 });
 </script>

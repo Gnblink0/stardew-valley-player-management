@@ -198,7 +198,7 @@ function getTopPlayers($limit = 5, $criteria = 'total_gold_earned') {
                 LIMIT :limit";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT); // 明确指定为整数类型
+        $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT); // explicitly specify as integer type
         $stmt->execute();
         return $stmt->fetchAll();
     } catch (PDOException $e) {
