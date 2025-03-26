@@ -46,6 +46,26 @@ A web application for managing and analyzing Stardew Valley player data. The sys
    ?>
    ```
 
+   - You need another `config.php` under the src folder.
+
+```php
+<?php
+// Database configuration
+$host = 'localhost';
+$dbname = 'stardew_valley';
+$username = 'root';
+$password = ''; //Enter your XAMPP password 
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+?>
+```
+
 
 
 ## Usage Guide
